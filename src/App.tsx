@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 import { db, auth, googleProvider, handleFirestoreError, OperationType } from './firebase';
-import { Course, Assignment, Note, Task } from './types';
+import { Course, Assignment, Note, Task, Profile } from './types';
 import coverImage from './assets/images/academic_os_cover_1783785015939.jpg';
 
 // Import our modular widgets and components
@@ -54,6 +54,7 @@ const SEED_COURSES: Course[] = [
     semester: 'Semestri II',
     progress: 60,
     color: '#3b82f6',
+    credits: 7,
   },
   {
     id: 'prog-102',
@@ -64,6 +65,7 @@ const SEED_COURSES: Course[] = [
     semester: 'Semestri II',
     progress: 70,
     color: '#10b981',
+    credits: 6,
   },
 ];
 
@@ -143,6 +145,10 @@ export default function App() {
   // Navigation and filtering
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('detyra');
+
+  // Tracks the student's academic level (reported by ProfileCard) to gate university-only features like ECTS credits
+  const [academicLevel, setAcademicLevel] = useState<Profile['academicLevel']>('Universitet');
+  const isUniversityMode = academicLevel === 'Universitet';
 
   // Modals and creating states
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -305,6 +311,7 @@ export default function App() {
       semester: courseData.semester || '',
       progress: courseData.progress || 0,
       color: courseData.color || '#10b981',
+      credits: courseData.credits,
       createdAt: new Date().toISOString(),
     };
 
@@ -597,7 +604,7 @@ export default function App() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ClockWidget />
           <PomodoroTimer />
-          <ProfileCard userId={user ? user.uid : null} />
+          <ProfileCard userId={user ? user.uid : null} onAcademicLevelChange={setAcademicLevel} />
         </div>
 
         {/* 3. "Classes & Subjects" Gallery */}
@@ -643,6 +650,7 @@ export default function App() {
                     setIsCourseModalOpen(true);
                   }}
                   onDelete={handleDeleteCourse}
+                  isUniversityMode={isUniversityMode}
                 />
               ))}
             </div>
@@ -723,6 +731,7 @@ export default function App() {
                 onUpdateAssignment={handleUpdateAssignment}
                 onDeleteAssignment={handleDeleteAssignment}
                 selectedCourseId={selectedCourseId}
+                isUniversityMode={isUniversityMode}
               />
             )}
 
@@ -750,6 +759,7 @@ export default function App() {
         }}
         onSave={handleSaveCourse}
         initialCourse={editingCourse}
+        isUniversityMode={isUniversityMode}
       />
 
       {/* Footer credits bar */}

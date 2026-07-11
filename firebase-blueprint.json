@@ -13,6 +13,7 @@
         "semester": { "type": "string", "description": "Semester information, e.g. Semestri I", "maxLength": 50 },
         "progress": { "type": "integer", "description": "Syllabus progress percentage" },
         "color": { "type": "string", "description": "Aesthetic accent color hex or tailwind class" },
+        "credits": { "type": "integer", "description": "Kredite ECTS, used to weight the university-mode overall average" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "name"]
