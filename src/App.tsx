@@ -28,11 +28,14 @@ import {
   Layers,
   X,
   AlertCircle,
+  Maximize,
+  Minimize,
 } from 'lucide-react';
 
 import { db, auth, googleProvider, handleFirestoreError, OperationType } from './firebase';
 import { Course, Assignment, Note, Task, Profile } from './types';
 import coverImage from './assets/images/academic_os_cover_1783785015939.jpg';
+import { useFullscreen } from './hooks/useFullscreen';
 
 // Import our modular widgets and components
 import ClockWidget from './components/ClockWidget';
@@ -153,6 +156,9 @@ export default function App() {
   // Modals and creating states
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+
+  // App-wide fullscreen toggle
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
 
   // Track Auth state
   useEffect(() => {
@@ -540,7 +546,14 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
 
         {/* Top-right Authentication Controls */}
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg"
+            title={isFullscreen ? 'Dil nga Ekrani i Plotë' : 'Ekrani i Plotë'}
+          >
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </button>
           {authLoading ? (
             <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
           ) : user ? (
