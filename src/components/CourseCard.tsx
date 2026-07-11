@@ -29,7 +29,7 @@ export default function CourseCard({ course, onSelect, isSelected, onEdit, onDel
       <div className="flex justify-between items-start pt-1">
         <div>
           <span className="text-[10px] font-mono uppercase bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded text-zinc-500 dark:text-zinc-400">
-            {course.code || 'NO-CODE'}
+            {course.code || 'PA-KOD'}
           </span>
           <h4 className="font-semibold text-zinc-800 dark:text-zinc-100 text-base mt-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
             {course.name}
@@ -39,14 +39,14 @@ export default function CourseCard({ course, onSelect, isSelected, onEdit, onDel
           <button
             onClick={() => onEdit(course)}
             className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-            title="Edit Course"
+            title="Ndrysho Lëndën"
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onDelete(course.id)}
             className="p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-400 hover:text-red-500 transition-colors"
-            title="Delete Course"
+            title="Fshi Lëndën"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -70,7 +70,7 @@ export default function CourseCard({ course, onSelect, isSelected, onEdit, onDel
 
       <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-900/60">
         <div className="flex items-center justify-between text-[11px] font-medium text-zinc-500 dark:text-zinc-400 font-mono mb-1">
-          <span>Subject Progress</span>
+          <span>Progresi i Lëndës</span>
           <span>{course.progress || 0}%</span>
         </div>
         <div className="w-full bg-zinc-100 dark:bg-zinc-900 h-1.5 rounded-full overflow-hidden">
@@ -141,13 +141,13 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
         </button>
 
         <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100 mb-4">
-          {initialCourse ? 'Edit Class / Course' : 'Create New Class / Course'}
+          {initialCourse ? 'Ndrysho Lëndën' : 'Krijo Lëndë të Re'}
         </h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-              Course / Subject Name *
+              Emri i Lëndës *
             </label>
             <input
               type="text"
@@ -155,7 +155,7 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={100}
-              placeholder="e.g. AP Calculus or Biology"
+              placeholder="p.sh. Matematikë e Lartë ose Biologji"
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -163,27 +163,27 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-                Class / Course Code
+                Kodi i Lëndës
               </label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 maxLength={20}
-                placeholder="e.g. AP-CALC"
+                placeholder="p.sh. MAT101"
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-                Term / Semester
+                Semestri
               </label>
               <input
                 type="text"
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 maxLength={50}
-                placeholder="e.g. Trimester 1, Fall Term"
+                placeholder="p.sh. Semestri I, Viti Akademik 2025-2026"
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -191,14 +191,14 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
 
           <div>
             <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-              Teacher / Instructor Name
+              Mësuesi / Pedagogu
             </label>
             <input
               type="text"
               value={instructor}
               onChange={(e) => setInstructor(e.target.value)}
               maxLength={100}
-              placeholder="e.g. Mr. Miller or Mrs. Davis"
+              placeholder="p.sh. Prof. Dr. Agron Nishani"
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -206,7 +206,7 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
           <div className="grid grid-cols-2 gap-3 items-center">
             <div>
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-                Syllabus Progress (%)
+                Progresi i Programit (%)
               </label>
               <input
                 type="number"
@@ -219,7 +219,7 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
             </div>
             <div>
               <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
-                Theme Color
+                Ngjyra e Temës
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {colors.map((c) => (
@@ -243,13 +243,13 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
               onClick={onClose}
               className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all text-sm font-medium"
             >
-              Cancel
+              Anulo
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition-all text-sm font-medium"
             >
-              Save Class / Course
+              Ruaj Lëndën
             </button>
           </div>
         </form>

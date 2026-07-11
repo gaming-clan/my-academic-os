@@ -7,10 +7,10 @@
       "properties": {
         "id": { "type": "string", "description": "Unique identifier of the course" },
         "userId": { "type": "string", "description": "The UID of the user who owns this course" },
-        "name": { "type": "string", "description": "Course name, e.g. Higher Mathematics", "maxLength": 100 },
-        "code": { "type": "string", "description": "Course code, e.g. MATH101", "maxLength": 20 },
+        "name": { "type": "string", "description": "Course name, e.g. Matematikë e Lartë", "maxLength": 100 },
+        "code": { "type": "string", "description": "Course code, e.g. MAT201", "maxLength": 20 },
         "instructor": { "type": "string", "description": "Instructor name", "maxLength": 100 },
-        "semester": { "type": "string", "description": "Semester information", "maxLength": 50 },
+        "semester": { "type": "string", "description": "Semester information, e.g. Semestri I", "maxLength": 50 },
         "progress": { "type": "integer", "description": "Syllabus progress percentage" },
         "color": { "type": "string", "description": "Aesthetic accent color hex or tailwind class" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -28,8 +28,8 @@
         "title": { "type": "string", "description": "Assignment title", "maxLength": 100 },
         "dueDate": { "type": "string", "format": "date" },
         "weight": { "type": "integer", "description": "Grade weight percentage" },
-        "grade": { "type": "integer", "description": "Score achieved (optional)" },
-        "status": { "type": "string", "enum": ["Not Started", "In Progress", "Submitted", "Graded"] },
+        "grade": { "type": "number", "description": "Nota achieved, Albanian scale 4 to 10 (optional)" },
+        "status": { "type": "string", "enum": ["Pa Filluar", "Në Vazhdim", "Dorëzuar", "Vlerësuar"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "courseId", "title", "weight", "status"]
@@ -44,7 +44,7 @@
         "courseId": { "type": "string", "description": "The associated course ID" },
         "title": { "type": "string", "description": "Note title", "maxLength": 100 },
         "content": { "type": "string", "description": "Markdown text content", "maxLength": 50000 },
-        "folder": { "type": "string", "description": "Folder category e.g. Lecture, Lab, Study" },
+        "folder": { "type": "string", "description": "Folder category e.g. Leksione, Laborator, Udhëzues Studimi" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -59,7 +59,7 @@
         "userId": { "type": "string", "description": "The UID of the user" },
         "courseId": { "type": "string", "description": "The associated course ID (optional)" },
         "title": { "type": "string", "description": "Task title", "maxLength": 100 },
-        "status": { "type": "string", "enum": ["Not Started", "In Progress", "Completed"] },
+        "status": { "type": "string", "enum": ["Pa Filluar", "Në Vazhdim", "Përfunduar"] },
         "dueDate": { "type": "string", "format": "date" },
         "createdAt": { "type": "string", "format": "date-time" }
       },

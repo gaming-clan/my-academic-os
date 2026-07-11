@@ -17,8 +17,8 @@ export interface Assignment {
   title: string;
   dueDate?: string; // YYYY-MM-DD
   weight: number; // 0 to 100
-  grade?: number; // 0 to 100
-  status: 'Not Started' | 'In Progress' | 'Submitted' | 'Graded';
+  grade?: number; // Nota, Albanian scale 4 to 10 (5 is the minimum passing grade)
+  status: 'Pa Filluar' | 'Në Vazhdim' | 'Dorëzuar' | 'Vlerësuar';
   createdAt?: string;
 }
 
@@ -28,7 +28,7 @@ export interface Note {
   courseId: string;
   title: string;
   content: string; // Markdown text
-  folder?: string; // Folder category like "Lecture", "Lab", "Study Guide"
+  folder?: string; // Folder category like "Leksione", "Laborator", "Udhëzues Studimi"
   createdAt?: string;
   updatedAt?: string;
 }
@@ -38,7 +38,7 @@ export interface Task {
   userId: string;
   courseId?: string; // Optional course link
   title: string;
-  status: 'Not Started' | 'In Progress' | 'Completed';
+  status: 'Pa Filluar' | 'Në Vazhdim' | 'Përfunduar';
   dueDate?: string; // YYYY-MM-DD
   createdAt?: string;
 }
@@ -46,7 +46,7 @@ export interface Task {
 export interface Profile {
   userId: string;
   name: string;
-  academicLevel?: 'University' | 'High School';
+  academicLevel?: 'Universitet' | 'Shkollë e Mesme';
   program?: string;
   studentId?: string;
   group?: string;

@@ -10,18 +10,18 @@ interface ProfileCardProps {
 
 const DEFAULT_PROFILE: Profile = {
   userId: 'local-user',
-  name: 'John Doe',
-  academicLevel: 'University',
-  program: 'Modern Technologies',
-  studentId: '63887',
-  group: '3988AGG'
+  name: 'Endrit Hoxha',
+  academicLevel: 'Universitet',
+  program: 'Inxhinieri Informatike',
+  studentId: 'ST-20231045',
+  group: 'Grupi 3, Viti II'
 };
 
 export default function ProfileCard({ userId }: ProfileCardProps) {
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(DEFAULT_PROFILE.name);
-  const [editedAcademicLevel, setEditedAcademicLevel] = useState<'University' | 'High School'>('University');
+  const [editedAcademicLevel, setEditedAcademicLevel] = useState<'Universitet' | 'Shkollë e Mesme'>('Universitet');
   const [editedProgram, setEditedProgram] = useState(DEFAULT_PROFILE.program || '');
   const [editedStudentId, setEditedStudentId] = useState(DEFAULT_PROFILE.studentId || '');
   const [editedGroup, setEditedGroup] = useState(DEFAULT_PROFILE.group || '');
@@ -77,7 +77,7 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
   // Set edited values when profile changes or edit is clicked
   const handleStartEdit = () => {
     setEditedName(profile.name);
-    setEditedAcademicLevel(profile.academicLevel || 'University');
+    setEditedAcademicLevel(profile.academicLevel || 'Universitet');
     setEditedProgram(profile.program || '');
     setEditedStudentId(profile.studentId || '');
     setEditedGroup(profile.group || '');
@@ -93,7 +93,7 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editedName.trim()) {
-      setSaveError('Name is required.');
+      setSaveError('Emri është i detyrueshëm.');
       return;
     }
 
@@ -126,26 +126,26 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
       setIsEditing(false);
     } catch (err: any) {
       console.error('Error saving profile:', err);
-      setSaveError('Failed to save profile. Please check validation limits.');
+      setSaveError('Ruajtja e profilit dështoi. Kontrolloni kufizimet e fushave.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const isHighSchool = profile.academicLevel === 'High School';
+  const isHighSchool = profile.academicLevel === 'Shkollë e Mesme';
 
   return (
     <div id="profile-card" className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm relative flex flex-col justify-between min-h-[14rem] h-auto">
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-1.5">
           <User className="w-3.5 h-3.5" />
-          {isHighSchool ? 'Student Profile (High School)' : 'Student Profile (University)'}
+          {isHighSchool ? 'Profili i Nxënësit (Shkollë e Mesme)' : 'Profili i Studentit (Universitet)'}
         </span>
         {!isEditing && (
           <button
             onClick={handleStartEdit}
             className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-            title="Edit Profile"
+            title="Ndrysho Profilin"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -156,7 +156,7 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
         <form onSubmit={handleSave} className="space-y-3 flex-1 flex flex-col justify-between">
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-mono text-zinc-400">Name</label>
+              <label className="text-[10px] uppercase font-mono text-zinc-400">Emri</label>
               <input
                 type="text"
                 value={editedName}
@@ -167,69 +167,69 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
             </div>
 
             <div className="col-span-2">
-              <label className="text-[10px] uppercase font-mono text-zinc-400">Academic Level</label>
+              <label className="text-[10px] uppercase font-mono text-zinc-400">Niveli Arsimor</label>
               <div className="flex gap-2 mt-1">
                 <button
                   type="button"
-                  onClick={() => setEditedAcademicLevel('University')}
+                  onClick={() => setEditedAcademicLevel('Universitet')}
                   className={`flex-1 py-1 px-3 text-xs font-semibold rounded-lg border transition-all ${
-                    editedAcademicLevel === 'University'
+                    editedAcademicLevel === 'Universitet'
                       ? 'bg-emerald-600 text-white border-transparent'
                       : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
                   }`}
                 >
-                  University
+                  Universitet
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEditedAcademicLevel('High School')}
+                  onClick={() => setEditedAcademicLevel('Shkollë e Mesme')}
                   className={`flex-1 py-1 px-3 text-xs font-semibold rounded-lg border transition-all ${
-                    editedAcademicLevel === 'High School'
+                    editedAcademicLevel === 'Shkollë e Mesme'
                       ? 'bg-emerald-600 text-white border-transparent'
                       : 'border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
                   }`}
                 >
-                  High School
+                  Shkollë e Mesme
                 </button>
               </div>
             </div>
 
             <div>
               <label className="text-[10px] uppercase font-mono text-zinc-400">
-                {editedAcademicLevel === 'High School' ? 'Grade / Year Level' : 'Program / Major'}
+                {editedAcademicLevel === 'Shkollë e Mesme' ? 'Klasa / Viti' : 'Programi i Studimit'}
               </label>
               <input
                 type="text"
                 value={editedProgram}
                 onChange={(e) => setEditedProgram(e.target.value)}
                 maxLength={150}
-                placeholder={editedAcademicLevel === 'High School' ? 'e.g. 11th Grade' : 'e.g. Modern Technologies'}
+                placeholder={editedAcademicLevel === 'Shkollë e Mesme' ? 'p.sh. Klasa e 11-të' : 'p.sh. Inxhinieri Informatike'}
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
               <label className="text-[10px] uppercase font-mono text-zinc-400">
-                {editedAcademicLevel === 'High School' ? 'Student ID / Roll No' : 'Student ID'}
+                {editedAcademicLevel === 'Shkollë e Mesme' ? 'Nr. i Nxënësit' : 'Nr. i Studentit'}
               </label>
               <input
                 type="text"
                 value={editedStudentId}
                 onChange={(e) => setEditedStudentId(e.target.value)}
                 maxLength={50}
-                placeholder={editedAcademicLevel === 'High School' ? 'e.g. Roll 24' : 'e.g. 63887'}
+                placeholder={editedAcademicLevel === 'Shkollë e Mesme' ? 'p.sh. Nr. 24' : 'p.sh. ST-20231045'}
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div className="col-span-2">
               <label className="text-[10px] uppercase font-mono text-zinc-400">
-                {editedAcademicLevel === 'High School' ? 'Class / Homeroom' : 'Study Group / Cohort'}
+                {editedAcademicLevel === 'Shkollë e Mesme' ? 'Klasa / Paralelja' : 'Grupi i Studimit'}
               </label>
               <input
                 type="text"
                 value={editedGroup}
                 onChange={(e) => setEditedGroup(e.target.value)}
                 maxLength={50}
-                placeholder={editedAcademicLevel === 'High School' ? 'e.g. Homeroom 3B' : 'e.g. 3988AGG'}
+                placeholder={editedAcademicLevel === 'Shkollë e Mesme' ? 'p.sh. 11-A' : 'p.sh. Grupi 3, Viti II'}
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
@@ -248,14 +248,14 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
               onClick={handleCancelEdit}
               className="px-2.5 py-1 text-xs border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-500 transition-all flex items-center gap-1"
             >
-              <X className="w-3.5 h-3.5" /> Cancel
+              <X className="w-3.5 h-3.5" /> Anulo
             </button>
             <button
               type="submit"
               disabled={isLoading}
               className="px-2.5 py-1 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-1 shadow-sm"
             >
-              <Check className="w-3.5 h-3.5" /> Save
+              <Check className="w-3.5 h-3.5" /> Ruaj
             </button>
           </div>
         </form>
@@ -270,7 +270,7 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
                 {profile.name}
               </h3>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">
-                {isHighSchool ? 'Secondary Education' : 'Higher Education'}
+                {isHighSchool ? 'Arsimi i Mesëm' : 'Arsimi i Lartë'}
               </p>
             </div>
           </div>
@@ -280,10 +280,10 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
               <GraduationCap className="w-4 h-4 text-zinc-400" />
               <div className="truncate">
                 <p className="text-[10px] text-zinc-400 font-mono leading-none">
-                  {isHighSchool ? 'GRADE LEVEL' : 'PROGRAM'}
+                  {isHighSchool ? 'KLASA' : 'PROGRAMI'}
                 </p>
                 <p className="font-medium text-zinc-700 dark:text-zinc-300 truncate mt-0.5" title={profile.program}>
-                  {profile.program || 'Not set'}
+                  {profile.program || 'I paplotësuar'}
                 </p>
               </div>
             </div>
@@ -292,10 +292,10 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
               <Hash className="w-4 h-4 text-zinc-400" />
               <div>
                 <p className="text-[10px] text-zinc-400 font-mono leading-none">
-                  {isHighSchool ? 'STUDENT ID / ROLL' : 'STUDENT ID'}
+                  {isHighSchool ? 'NR. I NXËNËSIT' : 'NR. I STUDENTIT'}
                 </p>
                 <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
-                  {profile.studentId || 'Not set'}
+                  {profile.studentId || 'I paplotësuar'}
                 </p>
               </div>
             </div>
@@ -304,10 +304,10 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
               <Users className="w-4 h-4 text-zinc-400" />
               <div>
                 <p className="text-[10px] text-zinc-400 font-mono leading-none">
-                  {isHighSchool ? 'CLASS / HOMEROOM' : 'STUDY GROUP'}
+                  {isHighSchool ? 'KLASA / PARALELJA' : 'GRUPI I STUDIMIT'}
                 </p>
                 <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
-                  {profile.group || 'Not set'}
+                  {profile.group || 'I paplotësuar'}
                 </p>
               </div>
             </div>

@@ -43,25 +43,25 @@ import TaskTracker from './components/TaskTracker';
 import AssignmentTracker from './components/AssignmentTracker';
 import NoteEditor from './components/NoteEditor';
 
-// Mock Seed Data for Instant Aesthetic Polish
+// Të Dhëna Shembull për Poliruar Estetikën e Menjëhershme
 const SEED_COURSES: Course[] = [
   {
     id: 'math-101',
     userId: 'local-user',
-    name: 'Higher Mathematics',
-    code: 'MATH301',
-    instructor: 'Mary Ginberg',
-    semester: '2nd Semester',
+    name: 'Matematikë e Lartë',
+    code: 'MAT201',
+    instructor: 'Prof. Asoc. Dr. Ilir Kaçani',
+    semester: 'Semestri II',
     progress: 60,
     color: '#3b82f6',
   },
   {
     id: 'prog-102',
     userId: 'local-user',
-    name: 'Programming Systems',
-    code: 'CS201',
-    instructor: 'Stephan Kim',
-    semester: '2nd Semester',
+    name: 'Sisteme Programimi',
+    code: 'INF204',
+    instructor: 'Dr. Elona Hoxha',
+    semester: 'Semestri II',
     progress: 70,
     color: '#10b981',
   },
@@ -72,16 +72,16 @@ const SEED_TASKS: Task[] = [
     id: 'task-1',
     userId: 'local-user',
     courseId: 'math-101',
-    title: 'Review Section 4.2 Matrix Determinants',
-    status: 'In Progress',
+    title: 'Rishiko Kapitullin 4.2 - Përcaktorët e Matricave',
+    status: 'Në Vazhdim',
     dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
   },
   {
     id: 'task-2',
     userId: 'local-user',
     courseId: 'prog-102',
-    title: 'Implement Binary Search Trees Assignment',
-    status: 'Not Started',
+    title: 'Zbato Detyrën e Pemëve Binare të Kërkimit',
+    status: 'Pa Filluar',
     dueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
   },
 ];
@@ -91,20 +91,20 @@ const SEED_ASSIGNMENTS: Assignment[] = [
     id: 'assign-1',
     userId: 'local-user',
     courseId: 'math-101',
-    title: 'Linear Algebra Midterm Exam',
+    title: 'Provimi Ndërkohor i Algjebrës Lineare',
     weight: 30,
-    grade: 90,
-    status: 'Graded',
+    grade: 9,
+    status: 'Vlerësuar',
     dueDate: new Date(Date.now() - 86400000 * 3).toISOString().split('T')[0],
   },
   {
     id: 'assign-2',
     userId: 'local-user',
     courseId: 'prog-102',
-    title: 'Memory Allocator Project',
+    title: 'Projekti i Menaxhimit të Memories',
     weight: 20,
-    grade: 85,
-    status: 'Graded',
+    grade: 8.5,
+    status: 'Vlerësuar',
     dueDate: new Date(Date.now() - 86400000 * 1).toISOString().split('T')[0],
   },
 ];
@@ -114,21 +114,21 @@ const SEED_NOTES: Note[] = [
     id: 'note-1',
     userId: 'local-user',
     courseId: 'math-101',
-    title: 'Matrix Determinants & Inverse',
-    folder: 'Lectures',
-    content: `# Matrix Determinants & Inverse\n\n## Determinants Definition\n\nThe determinant of a $2\\times2$ matrix $A$ is computed as:\n\n$$\\det(A) = ad - bc$$\n\n## Finding the Inverse\n\nFor a square matrix $A$:\n\n$$A^{-1} = \\frac{1}{\\det(A)} \\text{adj}(A)$$\n\n### Essential Rules\n- A matrix is invertible **if and only if** its determinant is non-zero.`,
+    title: 'Përcaktorët dhe Inversi i Matricave',
+    folder: 'Leksione',
+    content: `# Përcaktorët dhe Inversi i Matricave\n\n## Përkufizimi i Përcaktorit\n\nPërcaktori i një matrice $2\\times2$ $A$ llogaritet si:\n\n$$\\det(A) = ad - bc$$\n\n## Gjetja e Inversit\n\nPër një matricë katrore $A$:\n\n$$A^{-1} = \\frac{1}{\\det(A)} \\text{adj}(A)$$\n\n### Rregulla Thelbësore\n- Një matricë është e invertueshme **atëherë dhe vetëm atëherë kur** përcaktori i saj është i ndryshëm nga zero.`,
   },
   {
     id: 'note-2',
     userId: 'local-user',
     courseId: 'prog-102',
-    title: 'Dynamic Memory Allocation',
-    folder: 'Labs',
-    content: `# Dynamic Memory Allocation in C/C++\n\n## Key Concepts\n- **Heap Memory**: Stored dynamically at run time.\n- **Operators**: \`malloc\`, \`free\` in C, and \`new\`, \`delete\` in C++.\n\n## Example Lab Snippet\n\`\`\`cpp\nint* array = (int*)malloc(5 * sizeof(int));\nfor(int i = 0; i < 5; ++i) {\n    array[i] = i * 10;\n}\nfree(array);\n\`\`\``,
+    title: 'Alokimi Dinamik i Memories',
+    folder: 'Laborator',
+    content: `# Alokimi Dinamik i Memories në C/C++\n\n## Konceptet Kryesore\n- **Memoria Heap**: Ruhet në mënyrë dinamike gjatë ekzekutimit.\n- **Operatorët**: \`malloc\`, \`free\` në C, dhe \`new\`, \`delete\` në C++.\n\n## Shembull nga Laboratori\n\`\`\`cpp\nint* array = (int*)malloc(5 * sizeof(int));\nfor(int i = 0; i < 5; ++i) {\n    array[i] = i * 10;\n}\nfree(array);\n\`\`\``,
   },
 ];
 
-type ActiveTab = 'tasks' | 'assignments' | 'notes';
+type ActiveTab = 'detyra' | 'vleresime' | 'shenime';
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -142,7 +142,7 @@ export default function App() {
 
   // Navigation and filtering
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('tasks');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('detyra');
 
   // Modals and creating states
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -282,7 +282,7 @@ export default function App() {
   };
 
   const handleLogout = async () => {
-    if (confirm('Are you sure you want to log out?')) {
+    if (confirm('Jeni i sigurt që doni të dilni?')) {
       await signOut(auth);
       setCourses([]);
       setAssignments([]);
@@ -327,7 +327,7 @@ export default function App() {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    if (!confirm('Are you sure you want to delete this course? All associated data will remain but unlinked.')) return;
+    if (!confirm('Jeni i sigurt që doni ta fshini këtë lëndë? Të dhënat e lidhura do të mbeten por të pashkëputura.')) return;
 
     if (user) {
       const path = `courses/${courseId}`;
@@ -353,7 +353,7 @@ export default function App() {
       userId: uid,
       courseId: taskData.courseId,
       title: taskData.title || '',
-      status: 'Not Started',
+      status: 'Pa Filluar',
       dueDate: taskData.dueDate,
       createdAt: new Date().toISOString(),
     };
@@ -414,7 +414,7 @@ export default function App() {
       dueDate: assignData.dueDate,
       weight: assignData.weight || 0,
       grade: assignData.grade,
-      status: assignData.status || 'Not Started',
+      status: assignData.status || 'Pa Filluar',
       createdAt: new Date().toISOString(),
     };
 
@@ -527,7 +527,7 @@ export default function App() {
       <div className="relative h-64 w-full overflow-hidden flex items-end">
         <img
           src={coverImage}
-          alt="Aesthetic Mountain Cover"
+          alt="Kopertinë Estetike Malore"
           className="absolute inset-0 w-full h-full object-cover select-none"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
@@ -539,11 +539,11 @@ export default function App() {
           ) : user ? (
             <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-2xl pl-3 pr-2 py-1.5 border border-white/10 text-white shadow-lg">
               <UserCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold">{user.displayName || 'Synced'}</span>
+              <span className="text-xs font-semibold">{user.displayName || 'I Sinkronizuar'}</span>
               <button
                 onClick={handleLogout}
                 className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
-                title="Log Out"
+                title="Dilni"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -554,7 +554,7 @@ export default function App() {
               className="flex items-center gap-1.5 bg-white hover:bg-zinc-50 text-zinc-900 font-semibold px-4 py-2 rounded-2xl shadow-lg border border-zinc-200 text-xs transition-all cursor-pointer"
             >
               <Cloud className="w-3.5 h-3.5 text-blue-500 animate-bounce" />
-              Link Google Sync
+              Lidhu me Google
             </button>
           )}
         </div>
@@ -566,10 +566,10 @@ export default function App() {
           </div>
           <div className="mb-2">
             <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-2">
-              My Academic OS <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+              Sistemi Im Akademik <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
             </h1>
             <p className="text-zinc-200 text-xs font-medium md:text-sm">
-              An all-in-one workspace to organize classes, courses, grades, and study logs.
+              Një hapësirë pune për të organizuar lëndët, notat, orarin dhe shënimet e studimit.
             </p>
           </div>
         </div>
@@ -582,13 +582,13 @@ export default function App() {
           <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-400 p-3 rounded-2xl text-xs font-medium">
             <div className="flex items-center gap-2">
               <CloudOff className="w-4 h-4 text-amber-500" />
-              <span>You are currently in Local Offline mode. Connect to Google to secure persistent cloud sync.</span>
+              <span>Aktualisht jeni në modalitetin Lokal Jashtë Linje. Lidhuni me Google për sinkronizim të vazhdueshëm në cloud.</span>
             </div>
             <button
               onClick={handleGoogleLogin}
               className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-xl shadow-xs transition-all font-semibold"
             >
-              Sign In
+              Identifikohu
             </button>
           </div>
         )}
@@ -605,10 +605,10 @@ export default function App() {
           <div className="flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-800/60 pb-3">
             <div>
               <h2 className="text-lg font-bold text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-                Classes &amp; Subjects
+                Lëndët
               </h2>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">
-                Click a class/subject card to filter notes, tasks, and assignments below
+                Klikoni një lëndë për të filtruar shënimet, detyrat dhe vlerësimet më poshtë
               </p>
             </div>
             <button
@@ -618,16 +618,16 @@ export default function App() {
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition-all"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Class
+              <Plus className="w-3.5 h-3.5" /> Shto Lëndë
             </button>
           </div>
 
           {courses.length === 0 ? (
             <div className="text-center py-12 text-zinc-400 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white/40 dark:bg-zinc-950/20">
               <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-40" />
-              <h4 className="font-semibold text-zinc-700 dark:text-zinc-300">No Classes Added</h4>
+              <h4 className="font-semibold text-zinc-700 dark:text-zinc-300">Nuk ka Lëndë të Shtuara</h4>
               <p className="text-xs mt-1 max-w-sm mx-auto">
-                Create a class or course to begin organizing your academic syllabus.
+                Krijoni një lëndë për të filluar organizimin e programit tuaj akademik.
               </p>
             </div>
           ) : (
@@ -655,34 +655,34 @@ export default function App() {
             {/* Tabs Trigger */}
             <div className="flex gap-1.5 bg-zinc-200/50 dark:bg-zinc-900 p-0.5 rounded-xl text-xs font-semibold">
               <button
-                onClick={() => setActiveTab('tasks')}
+                onClick={() => setActiveTab('detyra')}
                 className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                  activeTab === 'tasks'
+                  activeTab === 'detyra'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                 }`}
               >
-                <CheckCircle className="w-4 h-4" /> To-Do Checklist ({tasks.length})
+                <CheckCircle className="w-4 h-4" /> Lista e Detyrave ({tasks.length})
               </button>
               <button
-                onClick={() => setActiveTab('assignments')}
+                onClick={() => setActiveTab('vleresime')}
                 className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                  activeTab === 'assignments'
+                  activeTab === 'vleresime'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                 }`}
               >
-                <Calendar className="w-4 h-4" /> Assignments &amp; Grade OS ({assignments.length})
+                <Calendar className="w-4 h-4" /> Detyra &amp; Notat ({assignments.length})
               </button>
               <button
-                onClick={() => setActiveTab('notes')}
+                onClick={() => setActiveTab('shenime')}
                 className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                  activeTab === 'notes'
+                  activeTab === 'shenime'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                 }`}
               >
-                <FileText className="w-4 h-4" /> Study Notes &amp; Logs ({notes.length})
+                <FileText className="w-4 h-4" /> Shënime Studimi ({notes.length})
               </button>
             </div>
 
@@ -690,11 +690,11 @@ export default function App() {
             {selectedCourseId && (
               <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-semibold border border-emerald-500/20 shadow-xs animate-fade-in">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span>Filtered by Course</span>
+                <span>Filtruar sipas Lëndës</span>
                 <button
                   onClick={() => setSelectedCourseId(null)}
                   className="p-0.5 rounded-full hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 transition-colors"
-                  title="Clear Filter"
+                  title="Hiq Filtrin"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -704,7 +704,7 @@ export default function App() {
 
           {/* Interactive view container */}
           <div className="bg-white/40 dark:bg-zinc-950/20 rounded-2xl">
-            {activeTab === 'tasks' && (
+            {activeTab === 'detyra' && (
               <TaskTracker
                 tasks={tasks}
                 courses={courses}
@@ -715,7 +715,7 @@ export default function App() {
               />
             )}
 
-            {activeTab === 'assignments' && (
+            {activeTab === 'vleresime' && (
               <AssignmentTracker
                 assignments={assignments}
                 courses={courses}
@@ -726,7 +726,7 @@ export default function App() {
               />
             )}
 
-            {activeTab === 'notes' && (
+            {activeTab === 'shenime' && (
               <NoteEditor
                 notes={notes}
                 courses={courses}
@@ -754,7 +754,7 @@ export default function App() {
 
       {/* Footer credits bar */}
       <footer className="border-t border-zinc-200/50 dark:border-zinc-800/50 py-6 mt-12 bg-white/40 dark:bg-zinc-950/10 flex items-center justify-center text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
-        Academic OS • Engineered with React, Tailwind &amp; Cloud Firestore
+        Sistemi Akademik • Ndërtuar me React, Tailwind &amp; Cloud Firestore
       </footer>
     </div>
   );
