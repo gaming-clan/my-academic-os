@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, GraduationCap, Hash, Users, Edit2, Check, X, ShieldAlert, BookOpen } from 'lucide-react';
+import { User, GraduationCap, Hash, Users, Edit2, Check, X, ShieldAlert, BookOpen, School } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { Profile } from '../types';
@@ -13,6 +13,7 @@ const DEFAULT_PROFILE: Profile = {
   userId: 'local-user',
   name: 'Endrit Hoxha',
   academicLevel: 'Universitet',
+  institution: 'Universiteti i Tiranës',
   program: 'Inxhinieri Informatike',
   studentId: 'ST-20231045',
   group: 'Grupi 3, Viti II'
@@ -23,6 +24,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(DEFAULT_PROFILE.name);
   const [editedAcademicLevel, setEditedAcademicLevel] = useState<'Universitet' | 'Shkollë e Mesme'>('Universitet');
+  const [editedInstitution, setEditedInstitution] = useState(DEFAULT_PROFILE.institution || '');
   const [editedProgram, setEditedProgram] = useState(DEFAULT_PROFILE.program || '');
   const [editedStudentId, setEditedStudentId] = useState(DEFAULT_PROFILE.studentId || '');
   const [editedGroup, setEditedGroup] = useState(DEFAULT_PROFILE.group || '');
@@ -84,6 +86,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
   const handleStartEdit = () => {
     setEditedName(profile.name);
     setEditedAcademicLevel(profile.academicLevel || 'Universitet');
+    setEditedInstitution(profile.institution || '');
     setEditedProgram(profile.program || '');
     setEditedStudentId(profile.studentId || '');
     setEditedGroup(profile.group || '');
@@ -107,6 +110,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
       userId: userId || 'local-user',
       name: editedName,
       academicLevel: editedAcademicLevel,
+      institution: editedInstitution,
       program: editedProgram,
       studentId: editedStudentId,
       group: editedGroup,
@@ -200,6 +204,20 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
               </div>
             </div>
 
+            <div className="col-span-2">
+              <label className="text-[10px] uppercase font-mono text-zinc-400">
+                {editedAcademicLevel === 'Shkollë e Mesme' ? 'Shkolla e Mesme' : 'Universiteti'}
+              </label>
+              <input
+                type="text"
+                value={editedInstitution}
+                onChange={(e) => setEditedInstitution(e.target.value)}
+                maxLength={150}
+                placeholder={editedAcademicLevel === 'Shkollë e Mesme' ? 'p.sh. Gjimnazi "Sami Frashëri"' : 'p.sh. Universiteti i Tiranës'}
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
             <div>
               <label className="text-[10px] uppercase font-mono text-zinc-400">
                 {editedAcademicLevel === 'Shkollë e Mesme' ? 'Klasa / Viti' : 'Programi i Studimit'}
@@ -282,6 +300,18 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
           </div>
 
           <div className="grid grid-cols-2 gap-y-2 gap-x-4 border-t border-zinc-100 dark:border-zinc-900 pt-3 mt-3 text-xs">
+            <div className="flex items-center gap-2 col-span-2">
+              <School className="w-4 h-4 text-zinc-400" />
+              <div className="truncate">
+                <p className="text-[10px] text-zinc-400 font-mono leading-none">
+                  {isHighSchool ? 'SHKOLLA E MESME' : 'UNIVERSITETI'}
+                </p>
+                <p className="font-medium text-zinc-700 dark:text-zinc-300 truncate mt-0.5" title={profile.institution}>
+                  {profile.institution || 'I paplotësuar'}
+                </p>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4 text-zinc-400" />
               <div className="truncate">

@@ -48,6 +48,7 @@ export interface Profile {
   userId: string;
   name: string;
   academicLevel?: 'Universitet' | 'Shkollë e Mesme';
+  institution?: string; // Name of the high school or university
   program?: string;
   studentId?: string;
   group?: string;
