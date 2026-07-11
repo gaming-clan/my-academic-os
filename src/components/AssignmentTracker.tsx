@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Award, Calendar, Trash2, ShieldAlert, BarChart2, CheckCircle2 } from 'lucide-react';
+import { Plus, Award, Calendar, Trash2, ShieldAlert, BarChart2, CheckCircle2, GraduationCap } from 'lucide-react';
 import { Assignment, Course } from '../types';
 
 interface AssignmentTrackerProps {
@@ -9,7 +9,22 @@ interface AssignmentTrackerProps {
   onUpdateAssignment: (assignmentId: string, updates: Partial<Assignment>) => void;
   onDeleteAssignment: (assignmentId: string) => void;
   selectedCourseId: string | null;
+  isUniversityMode?: boolean;
 }
+
+type GradeInputMode = 'nota' | 'pike';
+
+// Shkalla zyrtare e konvertimit nga 100 pikë në notën shqiptare 4-10
+const convertPointsToNota = (points: number) => {
+  const p = Math.max(0, Math.min(100, points));
+  if (p >= 90) return 10;
+  if (p >= 80) return 9;
+  if (p >= 70) return 8;
+  if (p >= 60) return 7;
+  if (p >= 50) return 6;
+  if (p >= 40) return 5;
+  return 4;
+};
 
 export default function AssignmentTracker({
   assignments,
@@ -18,11 +33,13 @@ export default function AssignmentTracker({
   onUpdateAssignment,
   onDeleteAssignment,
   selectedCourseId,
+  isUniversityMode,
 }: AssignmentTrackerProps) {
   const [newTitle, setNewTitle] = useState('');
   const [newCourseId, setNewCourseId] = useState('');
   const [newDueDate, setNewDueDate] = useState('');
   const [newWeight, setNewWeight] = useState(10);
+  const [gradeMode, setGradeMode] = useState<GradeInputMode>('nota');
   const [newGrade, setNewGrade] = useState('');
   const [newStatus, setNewStatus] = useState<Assignment['status']>('Pa Filluar');
 
@@ -31,16 +48,21 @@ export default function AssignmentTracker({
     return selectedCourseId ? a.courseId === selectedCourseId : true;
   });
 
+  const convertedPreview = newGrade !== '' && gradeMode === 'pike' ? convertPointsToNota(Number(newGrade)) : null;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newCourseId) return;
+
+    const finalGrade =
+      newGrade === '' ? undefined : gradeMode === 'pike' ? convertPointsToNota(Number(newGrade)) : Number(newGrade);
 
     onAddAssignment({
       title: newTitle,
       courseId: newCourseId,
       dueDate: newDueDate || undefined,
       weight: Number(newWeight),
-      grade: newGrade !== '' ? Number(newGrade) : undefined,
+      grade: finalGrade,
       status: newStatus,
     });
 
@@ -48,6 +70,7 @@ export default function AssignmentTracker({
     setNewCourseId('');
     setNewDueDate('');
     setNewWeight(10);
+    setGradeMode('nota');
     setNewGrade('');
     setNewStatus('Pa Filluar');
   };
@@ -58,6 +81,10 @@ export default function AssignmentTracker({
 
   const getCourseColor = (courseId: string) => {
     return courses.find((c) => c.id === courseId)?.color || '#10b981';
+  };
+
+  const getCourseCredits = (courseId: string) => {
+    return courses.find((c) => c.id === courseId)?.credits ?? 6;
   };
 
   // Llogaritja e Notave (Grade OS calculations, Albanian 4-10 scale)
@@ -89,8 +116,26 @@ export default function AssignmentTracker({
     return 'Mbetës';
   };
 
-  // Mesatarja e Përgjithshme (Overall Average), mesatarja e notave të lëndëve, shkallë 4-10
+  // Mesatarja e Përgjithshme: në modalitetin Universitet ponderohet sipas kredite ECTS të çdo lënde;
+  // në Shkollë e Mesme përdoret mesatarja e thjeshtë e notave të lëndëve.
   const calculateOverallAverage = () => {
+    if (isUniversityMode) {
+      let weightedSum = 0;
+      let totalCredits = 0;
+
+      courses.forEach((course) => {
+        const grade = calculateCourseGrade(course.id);
+        if (grade !== null) {
+          const credits = course.credits && course.credits > 0 ? course.credits : 6;
+          weightedSum += grade * credits;
+          totalCredits += credits;
+        }
+      });
+
+      if (totalCredits === 0) return null;
+      return Math.round((weightedSum / totalCredits) * 100) / 100;
+    }
+
     let totalNota = 0;
     let activeCourseCount = 0;
 
@@ -106,23 +151,61 @@ export default function AssignmentTracker({
     return Math.round((totalNota / activeCourseCount) * 100) / 100;
   };
 
+  // Kreditet ECTS të grumbulluara (nota kaluese, >= 5) nga totali i lëndëve
+  const calculateCreditsSummary = () => {
+    let earned = 0;
+    let total = 0;
+
+    courses.forEach((course) => {
+      const credits = course.credits && course.credits > 0 ? course.credits : 6;
+      total += credits;
+      const grade = calculateCourseGrade(course.id);
+      if (grade !== null && grade >= 5) {
+        earned += credits;
+      }
+    });
+
+    return { earned, total };
+  };
+
   const overallAverage = calculateOverallAverage();
+  const creditsSummary = isUniversityMode ? calculateCreditsSummary() : null;
 
   return (
     <div id="assignment-tracker" className="space-y-6">
       {/* Paneli i Notave (Grade OS Banner) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-5">
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 ${
+          isUniversityMode ? 'lg:grid-cols-4' : 'lg:grid-cols-3'
+        } gap-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-5`}
+      >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Mesatarja e Përgjithshme</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">
+              {isUniversityMode ? 'Mesatarja e Ponderuar (ECTS)' : 'Mesatarja e Përgjithshme'}
+            </p>
             <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 font-mono leading-tight">
               {overallAverage !== null ? `${overallAverage} (${getNotaCilesor(overallAverage)})` : 'N/A'}
             </h4>
           </div>
         </div>
+
+        {isUniversityMode && creditsSummary && (
+          <div className="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-zinc-200 dark:border-zinc-800 sm:pl-4 pt-3 sm:pt-0">
+            <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Kreditet ECTS</p>
+              <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 font-mono leading-tight">
+                {creditsSummary.earned} / {creditsSummary.total}
+              </h4>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-3 border-t sm:border-t-0 sm:border-l border-zinc-200 dark:border-zinc-800 sm:pl-4 pt-3 sm:pt-0">
           <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
@@ -194,7 +277,7 @@ export default function AssignmentTracker({
           </select>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-1">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
             Pesha %
           </label>
@@ -209,20 +292,70 @@ export default function AssignmentTracker({
           />
         </div>
 
-        <div className="md:col-span-1">
-          <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Nota
-          </label>
-          <input
-            type="number"
-            min="4"
-            max="10"
-            step="0.5"
-            value={newGrade}
-            onChange={(e) => setNewGrade(e.target.value)}
-            placeholder="N/A"
-            className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
-          />
+        <div className="md:col-span-3">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500">Nota</label>
+            <div className="flex gap-0.5 bg-zinc-200/50 dark:bg-zinc-900 p-0.5 rounded-md text-[9px] font-semibold">
+              <button
+                type="button"
+                onClick={() => {
+                  setGradeMode('nota');
+                  setNewGrade('');
+                }}
+                className={`px-1.5 py-0.5 rounded transition-all ${
+                  gradeMode === 'nota'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+              >
+                4-10
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setGradeMode('pike');
+                  setNewGrade('');
+                }}
+                className={`px-1.5 py-0.5 rounded transition-all ${
+                  gradeMode === 'pike'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+                title="Konverto nga 100 pikë në notë"
+              >
+                Pikë→Notë
+              </button>
+            </div>
+          </div>
+          {gradeMode === 'nota' ? (
+            <input
+              type="number"
+              min="4"
+              max="10"
+              step="0.5"
+              value={newGrade}
+              onChange={(e) => setNewGrade(e.target.value)}
+              placeholder="N/A"
+              className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+            />
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={newGrade}
+                onChange={(e) => setNewGrade(e.target.value)}
+                placeholder="0-100"
+                className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+              />
+              {convertedPreview !== null && (
+                <span className="flex-shrink-0 text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-1 rounded whitespace-nowrap">
+                  → {convertedPreview}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="md:col-span-2">
@@ -241,12 +374,13 @@ export default function AssignmentTracker({
           </select>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="md:col-span-1">
           <button
             type="submit"
-            className="w-full h-8 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all text-xs font-semibold shadow-sm"
+            className="w-full h-8 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all shadow-sm"
+            title="Shto Detyrën"
           >
-            <Plus className="w-3.5 h-3.5" /> Shto
+            <Plus className="w-4 h-4" />
           </button>
         </div>
       </form>
@@ -263,6 +397,11 @@ export default function AssignmentTracker({
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: course.color || '#10b981' }} />
                     <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate">{course.name}</span>
+                    {isUniversityMode && (
+                      <span className="text-[9px] font-mono text-zinc-400 flex-shrink-0">
+                        ({course.credits ?? 6} KR)
+                      </span>
+                    )}
                   </div>
                   <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-900 px-2 py-0.5 rounded">
                     {grade !== null ? `Nota ${grade}` : 'Pa nota'}
@@ -303,6 +442,11 @@ export default function AssignmentTracker({
                       <div className="flex items-center gap-1.5 min-w-0">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: getCourseColor(a.courseId) }} />
                         <span className="truncate max-w-[120px]">{getCourseName(a.courseId)}</span>
+                        {isUniversityMode && (
+                          <span className="text-[9px] font-mono text-zinc-400 flex-shrink-0">
+                            ({getCourseCredits(a.courseId)} KR)
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="py-3.5 px-4 font-mono font-semibold">{a.weight}%</td>

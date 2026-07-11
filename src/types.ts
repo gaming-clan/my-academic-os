@@ -7,6 +7,7 @@ export interface Course {
   semester?: string;
   progress?: number; // 0 to 100
   color?: string; // Hex color or styling theme class
+  credits?: number; // Kredite ECTS, used to weight the university-mode overall average
   createdAt?: string;
 }
 
