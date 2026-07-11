@@ -6,6 +6,7 @@ import { Profile } from '../types';
 
 interface ProfileCardProps {
   userId: string | null;
+  onAcademicLevelChange?: (level: Profile['academicLevel']) => void;
 }
 
 const DEFAULT_PROFILE: Profile = {
@@ -17,7 +18,7 @@ const DEFAULT_PROFILE: Profile = {
   group: 'Grupi 3, Viti II'
 };
 
-export default function ProfileCard({ userId }: ProfileCardProps) {
+export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCardProps) {
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(DEFAULT_PROFILE.name);
@@ -73,6 +74,11 @@ export default function ProfileCard({ userId }: ProfileCardProps) {
 
     loadProfile();
   }, [userId]);
+
+  // Let the parent know which academic level is active (used to gate university-only features)
+  useEffect(() => {
+    onAcademicLevelChange?.(profile.academicLevel);
+  }, [profile.academicLevel, onAcademicLevelChange]);
 
   // Set edited values when profile changes or edit is clicked
   const handleStartEdit = () => {

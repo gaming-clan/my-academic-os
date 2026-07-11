@@ -8,9 +8,10 @@ interface CourseCardProps {
   isSelected: boolean;
   onEdit: (course: Course) => void;
   onDelete: (courseId: string) => void;
+  isUniversityMode?: boolean;
 }
 
-export default function CourseCard({ course, onSelect, isSelected, onEdit, onDelete }: CourseCardProps) {
+export default function CourseCard({ course, onSelect, isSelected, onEdit, onDelete, isUniversityMode }: CourseCardProps) {
   return (
     <div
       onClick={() => onSelect(course.id)}
@@ -31,6 +32,11 @@ export default function CourseCard({ course, onSelect, isSelected, onEdit, onDel
           <span className="text-[10px] font-mono uppercase bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded text-zinc-500 dark:text-zinc-400">
             {course.code || 'PA-KOD'}
           </span>
+          {isUniversityMode && (
+            <span className="text-[10px] font-mono uppercase bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded text-zinc-500 dark:text-zinc-400 ml-1.5">
+              {course.credits ?? 6} KR
+            </span>
+          )}
           <h4 className="font-semibold text-zinc-800 dark:text-zinc-100 text-base mt-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
             {course.name}
           </h4>
@@ -93,15 +99,17 @@ interface CourseModalProps {
   onClose: () => void;
   onSave: (course: Partial<Course>) => void;
   initialCourse?: Course | null;
+  isUniversityMode?: boolean;
 }
 
-export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseModalProps) {
+export function CourseModal({ isOpen, onClose, onSave, initialCourse, isUniversityMode }: CourseModalProps) {
   const [name, setName] = useState(initialCourse?.name || '');
   const [code, setCode] = useState(initialCourse?.code || '');
   const [instructor, setInstructor] = useState(initialCourse?.instructor || '');
   const [semester, setSemester] = useState(initialCourse?.semester || '');
   const [progress, setProgress] = useState(initialCourse?.progress || 0);
   const [color, setColor] = useState(initialCourse?.color || '#10b981');
+  const [credits, setCredits] = useState(initialCourse?.credits ?? 6);
 
   if (!isOpen) return null;
 
@@ -116,6 +124,7 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
       semester,
       progress: Number(progress),
       color,
+      credits: isUniversityMode ? Number(credits) : initialCourse?.credits,
     });
   };
 
@@ -202,6 +211,26 @@ export function CourseModal({ isOpen, onClose, onSave, initialCourse }: CourseMo
               className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
             />
           </div>
+
+          {isUniversityMode && (
+            <div>
+              <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 font-mono block mb-1">
+                Kreditet ECTS
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="30"
+                value={credits}
+                onChange={(e) => setCredits(Math.max(1, Number(e.target.value)))}
+                placeholder="p.sh. 6"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+              />
+              <p className="text-[10px] text-zinc-400 font-mono mt-1">
+                Peshon lëndën në mesataren e ponderuar të universitetit
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3 items-center">
             <div>
