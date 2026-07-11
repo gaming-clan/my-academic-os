@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, Folder, Book, FileText, Search, Edit3, Eye, Trash2, Calendar, Layout, ChevronRight, Check } from 'lucide-react';
 import Markdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { Note, Course } from '../types';
 
 interface NoteEditorProps {
@@ -356,7 +358,9 @@ export default function NoteEditor({
 
                   {/* Markdown Renderer Body */}
                   <div className="markdown-body text-xs font-sans space-y-4">
-                    <Markdown>{content || '*Ende pa përmbajtje.*'}</Markdown>
+                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                      {content || '*Ende pa përmbajtje.*'}
+                    </Markdown>
                   </div>
                 </article>
               )}
