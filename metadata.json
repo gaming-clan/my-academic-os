@@ -1,6 +1,6 @@
 {
-  "name": "Academic OS",
-  "description": "A comprehensive academic operating system to track courses, assignments, grades, schedules, notes, tasks, and productivity pomodoro sessions.",
+  "name": "Sistemi Im Akademik",
+  "description": "Një sistem akademik gjithëpërfshirës për të ndjekur lëndët, detyrat, notat (shkalla shqiptare 4-10), orarin, shënimet, detyrat dhe sesionet e produktivitetit pomodoro.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

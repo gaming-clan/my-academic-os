@@ -12,7 +12,7 @@ interface NoteEditorProps {
   selectedCourseId: string | null;
 }
 
-const FOLDERS = ['Class Notes', 'Study Guide', 'Homework', 'Labs', 'Lectures', 'General'];
+const FOLDERS = ['Shënime Klase', 'Udhëzues Studimi', 'Detyra Shtëpie', 'Laborator', 'Leksione', 'Të Përgjithshme'];
 
 export default function NoteEditor({
   notes,
@@ -31,7 +31,7 @@ export default function NoteEditor({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [courseId, setCourseId] = useState('');
-  const [folder, setFolder] = useState('Class Notes');
+  const [folder, setFolder] = useState('Shënime Klase');
 
   const activeNote = notes.find((n) => n.id === activeNoteId);
 
@@ -48,12 +48,12 @@ export default function NoteEditor({
       setTitle(activeNote.title);
       setContent(activeNote.content);
       setCourseId(activeNote.courseId);
-      setFolder(activeNote.folder || 'Class Notes');
+      setFolder(activeNote.folder || 'Shënime Klase');
     } else {
       setTitle('');
       setContent('');
       setCourseId('');
-      setFolder('Class Notes');
+      setFolder('Shënime Klase');
     }
   }, [activeNote]);
 
@@ -61,15 +61,15 @@ export default function NoteEditor({
     const tempId = `temp-${Date.now()}`;
     const defaultCourseId = selectedCourseId || (courses.length > 0 ? courses[0].id : '');
     if (!defaultCourseId) {
-      alert('Please create a class/subject before adding notes.');
+      alert('Ju lutem krijoni një lëndë përpara se të shtoni shënime.');
       return;
     }
 
     const newNote: Partial<Note> = {
-      title: 'Untitled Note',
-      content: '# Untitled Note\n\nWrite your study notes here using standard markdown.',
+      title: 'Shënim pa Titull',
+      content: '# Shënim pa Titull\n\nShkruani shënimet tuaja të studimit këtu duke përdorur markdown standarde.',
       courseId: defaultCourseId,
-      folder: 'Class Notes',
+      folder: 'Shënime Klase',
     };
 
     onAddNote(newNote);
@@ -78,7 +78,7 @@ export default function NoteEditor({
   const handleSave = () => {
     if (!activeNoteId) return;
     onUpdateNote(activeNoteId, {
-      title: title || 'Untitled Note',
+      title: title || 'Shënim pa Titull',
       content,
       courseId,
       folder,
@@ -88,14 +88,14 @@ export default function NoteEditor({
 
   const handleDelete = () => {
     if (!activeNoteId) return;
-    if (confirm('Are you sure you want to delete this study note?')) {
+    if (confirm('Jeni i sigurt që doni ta fshini këtë shënim studimi?')) {
       onDeleteNote(activeNoteId);
       setActiveNoteId(null);
     }
   };
 
   const getCourseName = (cId: string) => {
-    return courses.find((c) => c.id === cId)?.name || 'Unknown Course';
+    return courses.find((c) => c.id === cId)?.name || 'Lëndë e Panjohur';
   };
 
   const getCourseColor = (cId: string) => {
@@ -120,13 +120,13 @@ export default function NoteEditor({
         <div className="p-4 border-b border-zinc-100 dark:border-zinc-900 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 font-mono">
-              Study Notes &amp; Logs
+              Shënime Studimi
             </span>
             <button
               onClick={handleCreateNote}
               className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex items-center gap-1 text-[10px] font-bold"
             >
-              <Plus className="w-3.5 h-3.5" /> Add Note
+              <Plus className="w-3.5 h-3.5" /> Shto Shënim
             </button>
           </div>
 
@@ -134,7 +134,7 @@ export default function NoteEditor({
             <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-zinc-400" />
             <input
               type="text"
-              placeholder="Search notes..."
+              placeholder="Kërko shënime..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 font-sans"
@@ -151,7 +151,7 @@ export default function NoteEditor({
                   : 'border-zinc-200/60 dark:border-zinc-800 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
               }`}
             >
-              All Folders
+              Të Gjitha Kategoritë
             </button>
             {FOLDERS.map((f) => (
               <button
@@ -174,7 +174,7 @@ export default function NoteEditor({
           {filteredNotes.length === 0 ? (
             <div className="text-center py-12 text-zinc-400">
               <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-xs">No notes found.</p>
+              <p className="text-xs">Nuk u gjetën shënime.</p>
             </div>
           ) : (
             filteredNotes.map((note) => {
@@ -195,7 +195,7 @@ export default function NoteEditor({
                     </h5>
                     <span className="text-[9px] font-mono font-bold uppercase bg-zinc-100 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 px-1 rounded-sm flex items-center gap-1">
                       <Folder className="w-2.5 h-2.5" />
-                      {note.folder || 'Class Notes'}
+                      {note.folder || 'Shënime Klase'}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-1 line-clamp-1 truncate font-sans">
@@ -232,7 +232,7 @@ export default function NoteEditor({
                       : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                   }`}
                 >
-                  <Edit3 className="w-3.5 h-3.5" /> Edit
+                  <Edit3 className="w-3.5 h-3.5" /> Ndrysho
                 </button>
                 <button
                   onClick={() => {
@@ -245,7 +245,7 @@ export default function NoteEditor({
                       : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                   }`}
                 >
-                  <Eye className="w-3.5 h-3.5" /> Preview
+                  <Eye className="w-3.5 h-3.5" /> Shiko
                 </button>
               </div>
 
@@ -254,12 +254,12 @@ export default function NoteEditor({
                   onClick={handleSave}
                   className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all text-xs font-semibold shadow-sm flex items-center gap-1"
                 >
-                  <Check className="w-3.5 h-3.5" /> Save Changes
+                  <Check className="w-3.5 h-3.5" /> Ruaj Ndryshimet
                 </button>
                 <button
                   onClick={handleDelete}
                   className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-red-50 dark:hover:bg-red-950/20 text-zinc-400 hover:text-red-500 transition-colors"
-                  title="Delete Note"
+                  title="Fshi Shënimin"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -273,7 +273,7 @@ export default function NoteEditor({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
-                        Category Folder
+                        Kategoria
                       </label>
                       <select
                         value={folder}
@@ -290,7 +290,7 @@ export default function NoteEditor({
 
                     <div className="sm:col-span-2">
                       <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
-                        Related Course
+                        Lënda e Lidhur
                       </label>
                       <select
                         value={courseId}
@@ -308,12 +308,12 @@ export default function NoteEditor({
 
                   <div>
                     <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
-                      Note Title
+                      Titulli i Shënimit
                     </label>
                     <input
                       type="text"
                       maxLength={100}
-                      placeholder="e.g. Lecture 1: Introductory Algebra..."
+                      placeholder="p.sh. Leksioni 1: Hyrje në Algjebër..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
@@ -322,10 +322,10 @@ export default function NoteEditor({
 
                   <div className="flex-1 flex flex-col min-h-[300px]">
                     <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
-                      Markdown Body Content
+                      Përmbajtja (Markdown)
                     </label>
                     <textarea
-                      placeholder="Write markdown study logs..."
+                      placeholder="Shkruani shënimet e studimit në markdown..."
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       maxLength={50000}
@@ -343,20 +343,20 @@ export default function NoteEditor({
                       {getCourseName(courseId)}
                     </span>
                     <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-                      {title || 'Untitled Note'}
+                      {title || 'Shënim pa Titull'}
                     </h1>
                     <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400 mt-1">
                       <Folder className="w-3.5 h-3.5 text-zinc-400" />
                       <span>{folder}</span>
                       <span className="mx-1">•</span>
                       <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Updated: {activeNote.updatedAt ? new Date(activeNote.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                      <span>Përditësuar: {activeNote.updatedAt ? new Date(activeNote.updatedAt).toLocaleDateString('sq-AL') : 'N/A'}</span>
                     </div>
                   </div>
 
                   {/* Markdown Renderer Body */}
                   <div className="markdown-body text-xs font-sans space-y-4">
-                    <Markdown>{content || '*No content provided yet.*'}</Markdown>
+                    <Markdown>{content || '*Ende pa përmbajtje.*'}</Markdown>
                   </div>
                 </article>
               )}
@@ -365,8 +365,8 @@ export default function NoteEditor({
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-zinc-400">
             <Layout className="w-12 h-12 opacity-30 mb-2 text-zinc-400" />
-            <h4 className="font-semibold text-zinc-800 dark:text-zinc-300">No Note Selected</h4>
-            <p className="text-xs mt-1">Select a note from the list, or create a new note to begin.</p>
+            <h4 className="font-semibold text-zinc-800 dark:text-zinc-300">Asnjë Shënim i Zgjedhur</h4>
+            <p className="text-xs mt-1">Zgjidhni një shënim nga lista, ose krijoni një të ri për të filluar.</p>
           </div>
         )}
       </div>

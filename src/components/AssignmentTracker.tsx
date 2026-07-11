@@ -24,7 +24,7 @@ export default function AssignmentTracker({
   const [newDueDate, setNewDueDate] = useState('');
   const [newWeight, setNewWeight] = useState(10);
   const [newGrade, setNewGrade] = useState('');
-  const [newStatus, setNewStatus] = useState<Assignment['status']>('Not Started');
+  const [newStatus, setNewStatus] = useState<Assignment['status']>('Pa Filluar');
 
   // Filter assignments based on selected course
   const filteredAssignments = assignments.filter((a) => {
@@ -49,18 +49,18 @@ export default function AssignmentTracker({
     setNewDueDate('');
     setNewWeight(10);
     setNewGrade('');
-    setNewStatus('Not Started');
+    setNewStatus('Pa Filluar');
   };
 
   const getCourseName = (courseId: string) => {
-    return courses.find((c) => c.id === courseId)?.name || 'Unknown Course';
+    return courses.find((c) => c.id === courseId)?.name || 'Lëndë e Panjohur';
   };
 
   const getCourseColor = (courseId: string) => {
     return courses.find((c) => c.id === courseId)?.color || '#10b981';
   };
 
-  // Grade OS calculations
+  // Llogaritja e Notave (Grade OS calculations, Albanian 4-10 scale)
   const calculateCourseGrade = (courseId: string) => {
     const courseAssignments = assignments.filter((a) => a.courseId === courseId && a.grade !== undefined);
     if (courseAssignments.length === 0) return null;
@@ -77,53 +77,49 @@ export default function AssignmentTracker({
     return Math.round((totalWeightedScore / totalWeight) * 10) / 10;
   };
 
-  const convertGradeToGPA = (grade: number) => {
-    if (grade >= 90) return 4.0;
-    if (grade >= 80) return 3.0;
-    if (grade >= 70) return 2.0;
-    if (grade >= 60) return 1.0;
-    return 0.0;
+  // Cilësori përshkrues sipas notës (4-10), përdorur në sistemin arsimor shqiptar
+  const getNotaCilesor = (nota: number) => {
+    const rounded = Math.round(nota);
+    if (rounded >= 10) return 'Shkëlqyeshëm';
+    if (rounded === 9) return 'Shumë Mirë';
+    if (rounded === 8) return 'Mirë';
+    if (rounded === 7) return 'Mjaft Mirë';
+    if (rounded === 6) return 'Mjaftueshëm';
+    if (rounded === 5) return 'Kalues';
+    return 'Mbetës';
   };
 
-  const getGPALetter = (gpa: number) => {
-    if (gpa >= 4.0) return 'A';
-    if (gpa >= 3.0) return 'B';
-    if (gpa >= 2.0) return 'C';
-    if (gpa >= 1.0) return 'D';
-    return 'F';
-  };
-
-  // Calculate overall GPA
-  const calculateOverallGPA = () => {
-    let totalGPAValues = 0;
+  // Mesatarja e Përgjithshme (Overall Average), mesatarja e notave të lëndëve, shkallë 4-10
+  const calculateOverallAverage = () => {
+    let totalNota = 0;
     let activeCourseCount = 0;
 
     courses.forEach((course) => {
       const grade = calculateCourseGrade(course.id);
       if (grade !== null) {
-        totalGPAValues += convertGradeToGPA(grade);
+        totalNota += grade;
         activeCourseCount++;
       }
     });
 
     if (activeCourseCount === 0) return null;
-    return Math.round((totalGPAValues / activeCourseCount) * 100) / 100;
+    return Math.round((totalNota / activeCourseCount) * 100) / 100;
   };
 
-  const overallGPA = calculateOverallGPA();
+  const overallAverage = calculateOverallAverage();
 
   return (
     <div id="assignment-tracker" className="space-y-6">
-      {/* Grade OS Banner */}
+      {/* Paneli i Notave (Grade OS Banner) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200/50 dark:border-zinc-800/50 rounded-2xl p-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Calculated GPA</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Mesatarja e Përgjithshme</p>
             <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 font-mono leading-tight">
-              {overallGPA !== null ? `${overallGPA} (${getGPALetter(overallGPA)})` : 'N/A'}
+              {overallAverage !== null ? `${overallAverage} (${getNotaCilesor(overallAverage)})` : 'N/A'}
             </h4>
           </div>
         </div>
@@ -133,7 +129,7 @@ export default function AssignmentTracker({
             <BarChart2 className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Total Graded</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Total i Vlerësuar</p>
             <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 font-mono leading-tight">
               {assignments.filter((a) => a.grade !== undefined).length} / {assignments.length}
             </h4>
@@ -145,9 +141,9 @@ export default function AssignmentTracker({
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Submitted</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono uppercase">Dorëzuar</p>
             <h4 className="text-xl font-bold text-zinc-800 dark:text-zinc-100 font-mono leading-tight">
-              {assignments.filter((a) => a.status === 'Submitted' || a.status === 'Graded').length}
+              {assignments.filter((a) => a.status === 'Dorëzuar' || a.status === 'Vlerësuar').length}
             </h4>
           </div>
         </div>
@@ -155,18 +151,18 @@ export default function AssignmentTracker({
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-900 pb-3">
         <div>
-          <h3 className="font-semibold text-zinc-800 dark:text-zinc-100 text-base">Assignments &amp; Schedule</h3>
+          <h3 className="font-semibold text-zinc-800 dark:text-zinc-100 text-base">Detyra &amp; Provime</h3>
           <p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">
-            Plan grade weights, record score percentages, and see automatic grading
+            Planifikoni peshat, regjistroni notat (shkalla 4-10) dhe shihni vlerësimin automatik
           </p>
         </div>
       </div>
 
-      {/* Assignment Entry Form */}
+      {/* Formulari i Shtimit të Detyrës */}
       <form onSubmit={handleSubmit} className="bg-zinc-50/50 dark:bg-zinc-900/20 rounded-xl p-4 border border-zinc-200/50 dark:border-zinc-800/50 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         <div className="md:col-span-3">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Assignment / Exam Name
+            Emri i Detyrës / Provimit
           </label>
           <input
             type="text"
@@ -174,14 +170,14 @@ export default function AssignmentTracker({
             maxLength={100}
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="e.g. Midterm Paper, Lab Report..."
+            placeholder="p.sh. Provimi Ndërkohor, Raporti i Laboratorit..."
             className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
           />
         </div>
 
         <div className="md:col-span-2">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Course *
+            Lënda *
           </label>
           <select
             required
@@ -189,7 +185,7 @@ export default function AssignmentTracker({
             onChange={(e) => setNewCourseId(e.target.value)}
             className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
           >
-            <option value="">Select Course</option>
+            <option value="">Zgjidh Lëndën</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -200,7 +196,7 @@ export default function AssignmentTracker({
 
         <div className="md:col-span-2">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Weight %
+            Pesha %
           </label>
           <input
             type="number"
@@ -215,12 +211,13 @@ export default function AssignmentTracker({
 
         <div className="md:col-span-1">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Grade %
+            Nota
           </label>
           <input
             type="number"
-            min="0"
-            max="100"
+            min="4"
+            max="10"
+            step="0.5"
             value={newGrade}
             onChange={(e) => setNewGrade(e.target.value)}
             placeholder="N/A"
@@ -230,17 +227,17 @@ export default function AssignmentTracker({
 
         <div className="md:col-span-2">
           <label className="text-[10px] font-mono uppercase text-zinc-400 dark:text-zinc-500 block mb-1">
-            Status
+            Statusi
           </label>
           <select
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value as Assignment['status'])}
             className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 rounded-lg px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
           >
-            <option value="Not Started">Not Started</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Submitted">Submitted</option>
-            <option value="Graded">Graded</option>
+            <option value="Pa Filluar">Pa Filluar</option>
+            <option value="Në Vazhdim">Në Vazhdim</option>
+            <option value="Dorëzuar">Dorëzuar</option>
+            <option value="Vlerësuar">Vlerësuar</option>
           </select>
         </div>
 
@@ -249,15 +246,15 @@ export default function AssignmentTracker({
             type="submit"
             className="w-full h-8 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-all text-xs font-semibold shadow-sm"
           >
-            <Plus className="w-3.5 h-3.5" /> Add
+            <Plus className="w-3.5 h-3.5" /> Shto
           </button>
         </div>
       </form>
 
-      {/* Course Averages Panel */}
+      {/* Paneli i Mesatareve të Lëndëve */}
       {courses.length > 0 && (
         <div className="bg-zinc-50/40 dark:bg-zinc-950/10 rounded-2xl border border-zinc-100 dark:border-zinc-900 p-4">
-          <h4 className="text-xs font-semibold font-mono text-zinc-400 uppercase tracking-wider mb-3">Course Averages</h4>
+          <h4 className="text-xs font-semibold font-mono text-zinc-400 uppercase tracking-wider mb-3">Mesatarja e Lëndëve</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
             {courses.map((course) => {
               const grade = calculateCourseGrade(course.id);
@@ -268,7 +265,7 @@ export default function AssignmentTracker({
                     <span className="font-semibold text-zinc-700 dark:text-zinc-300 truncate">{course.name}</span>
                   </div>
                   <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-900 px-2 py-0.5 rounded">
-                    {grade !== null ? `${grade}%` : 'No grades'}
+                    {grade !== null ? `Nota ${grade}` : 'Pa nota'}
                   </span>
                 </div>
               );
@@ -277,25 +274,25 @@ export default function AssignmentTracker({
         </div>
       )}
 
-      {/* Assignment List */}
+      {/* Lista e Detyrave */}
       <div className="border border-zinc-200/60 dark:border-zinc-800/60 rounded-2xl overflow-hidden bg-white dark:bg-zinc-950 shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-zinc-50 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500 font-mono font-semibold uppercase text-[10px] border-b border-zinc-100 dark:border-zinc-800">
-                <th className="py-3 px-4">Title</th>
-                <th className="py-3 px-4">Course</th>
-                <th className="py-3 px-4">Weight</th>
-                <th className="py-3 px-4">Grade</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4">Titulli</th>
+                <th className="py-3 px-4">Lënda</th>
+                <th className="py-3 px-4">Pesha</th>
+                <th className="py-3 px-4">Nota</th>
+                <th className="py-3 px-4">Statusi</th>
+                <th className="py-3 px-4 text-right">Veprime</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
               {filteredAssignments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-zinc-400 dark:text-zinc-500">
-                    No assignments found. Add your first assignment to calculate grades.
+                    Nuk u gjetën detyra. Shtoni detyrën tuaj të parë për të llogaritur notat.
                   </td>
                 </tr>
               ) : (
@@ -311,8 +308,8 @@ export default function AssignmentTracker({
                     <td className="py-3.5 px-4 font-mono font-semibold">{a.weight}%</td>
                     <td className="py-3.5 px-4 font-mono font-bold">
                       {a.grade !== undefined ? (
-                        <span className={a.grade >= 90 ? 'text-emerald-600 dark:text-emerald-400' : a.grade >= 70 ? 'text-amber-600' : 'text-red-500'}>
-                          {a.grade}%
+                        <span className={a.grade >= 9 ? 'text-emerald-600 dark:text-emerald-400' : a.grade >= 5 ? 'text-amber-600' : 'text-red-500'}>
+                          {a.grade}
                         </span>
                       ) : (
                         <span className="text-zinc-400">-</span>
@@ -323,24 +320,24 @@ export default function AssignmentTracker({
                         value={a.status}
                         onChange={(e) => onUpdateTaskOrAssignmentStatus(a, e.target.value as Assignment['status'])}
                         className={`font-mono text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 ${
-                          a.status === 'Graded'
+                          a.status === 'Vlerësuar'
                             ? 'text-emerald-600 dark:text-emerald-400'
-                            : a.status === 'Submitted'
+                            : a.status === 'Dorëzuar'
                             ? 'text-blue-500'
                             : 'text-zinc-500'
                         }`}
                       >
-                        <option value="Not Started">Not Started</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Submitted">Submitted</option>
-                        <option value="Graded">Graded</option>
+                        <option value="Pa Filluar">Pa Filluar</option>
+                        <option value="Në Vazhdim">Në Vazhdim</option>
+                        <option value="Dorëzuar">Dorëzuar</option>
+                        <option value="Vlerësuar">Vlerësuar</option>
                       </select>
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => onDeleteAssignment(a.id)}
                         className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-zinc-400 hover:text-red-500 transition-colors inline-flex"
-                        title="Delete Assignment"
+                        title="Fshi Detyrën"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -357,7 +354,7 @@ export default function AssignmentTracker({
 
   function onUpdateTaskOrAssignmentStatus(assignment: Assignment, status: Assignment['status']) {
     const updates: Partial<Assignment> = { status };
-    if (status !== 'Graded') {
+    if (status !== 'Vlerësuar') {
       updates.grade = undefined;
     }
     onUpdateAssignment(assignment.id, updates);

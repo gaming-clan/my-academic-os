@@ -17,9 +17,9 @@ export default function PomodoroTimer() {
   };
 
   const modeLabels: Record<TimerMode, string> = {
-    study: 'Study Time',
-    short: 'Short Break',
-    long: 'Long Break',
+    study: 'Koha e Studimit',
+    short: 'Pushim i Shkurtër',
+    long: 'Pushim i Gjatë',
   };
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function PomodoroTimer() {
           {mode === 'study' && <Flame className="w-3.5 h-3.5 text-amber-500" />}
           {mode === 'short' && <Coffee className="w-3.5 h-3.5 text-blue-400" />}
           {mode === 'long' && <Trophy className="w-3.5 h-3.5 text-indigo-400" />}
-          Focus Timer
+          Kohëmatësi i Fokusit
         </span>
         <div className="flex gap-1 bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg text-[10px] font-medium">
           {(['study', 'short', 'long'] as TimerMode[]).map((m) => (
@@ -104,7 +104,7 @@ export default function PomodoroTimer() {
                   : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
               }`}
             >
-              {m === 'study' ? 'Focus' : m === 'short' ? 'Short' : 'Long'}
+              {m === 'study' ? 'Fokus' : m === 'short' ? 'Shkurtër' : 'Gjatë'}
             </button>
           ))}
         </div>
@@ -142,18 +142,18 @@ export default function PomodoroTimer() {
         >
           {isRunning ? (
             <>
-              <Pause className="w-3.5 h-3.5 fill-current" /> Pause
+              <Pause className="w-3.5 h-3.5 fill-current" /> Pauzë
             </>
           ) : (
             <>
-              <Play className="w-3.5 h-3.5 fill-current" /> Start
+              <Play className="w-3.5 h-3.5 fill-current" /> Fillo
             </>
           )}
         </button>
         <button
           onClick={handleReset}
           className="p-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-          title="Reset"
+          title="Rifillo"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
