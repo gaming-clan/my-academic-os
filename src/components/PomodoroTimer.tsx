@@ -1,20 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Flame, Coffee, Trophy } from 'lucide-react';
+import { Play, Pause, RotateCcw, Flame, Coffee, Trophy, Minus, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 
 type TimerMode = 'study' | 'short' | 'long';
 
+const MIN_DURATION = 5 * 60;
+const MAX_DURATION = 2 * 60 * 60;
+const STEP = 5 * 60;
+
 export default function PomodoroTimer() {
   const [mode, setMode] = useState<TimerMode>('study');
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const durationMap: Record<TimerMode, number> = {
+  const [durations, setDurations] = useState<Record<TimerMode, number>>({
     study: 25 * 60,
     short: 5 * 60,
     long: 15 * 60,
-  };
+  });
+  const [timeLeft, setTimeLeft] = useState(durations.study);
+  const [isRunning, setIsRunning] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const modeLabels: Record<TimerMode, string> = {
     study: 'Koha e Studimit',
@@ -23,12 +26,20 @@ export default function PomodoroTimer() {
   };
 
   useEffect(() => {
-    setTimeLeft(durationMap[mode]);
+    setTimeLeft(durations[mode]);
     setIsRunning(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
+
+  const adjustDuration = (delta: number) => {
+    if (isRunning) return;
+    const newDuration = Math.min(MAX_DURATION, Math.max(MIN_DURATION, durations[mode] + delta));
+    setDurations((prev) => ({ ...prev, [mode]: newDuration }));
+    setTimeLeft(newDuration);
+  };
 
   useEffect(() => {
     if (isRunning) {
@@ -73,7 +84,7 @@ export default function PomodoroTimer() {
 
   const handleReset = () => {
     setIsRunning(false);
-    setTimeLeft(durationMap[mode]);
+    setTimeLeft(durations[mode]);
   };
 
   const formatTime = (seconds: number) => {
@@ -82,7 +93,7 @@ export default function PomodoroTimer() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progressPercent = ((durationMap[mode] - timeLeft) / durationMap[mode]) * 100;
+  const progressPercent = ((durations[mode] - timeLeft) / durations[mode]) * 100;
 
   return (
     <div id="pomodoro-timer" className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex flex-col justify-between h-52">
@@ -111,9 +122,27 @@ export default function PomodoroTimer() {
       </div>
 
       <div className="flex flex-col items-center justify-center my-auto">
-        <h3 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 font-mono">
-          {formatTime(timeLeft)}
-        </h3>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => adjustDuration(-STEP)}
+            disabled={isRunning || durations[mode] <= MIN_DURATION}
+            title="Zvogëlo kohën (min. 5 min)"
+            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <h3 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 font-mono tabular-nums">
+            {formatTime(timeLeft)}
+          </h3>
+          <button
+            onClick={() => adjustDuration(STEP)}
+            disabled={isRunning || durations[mode] >= MAX_DURATION}
+            title="Rrit kohën (maks. 2 orë)"
+            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
         <p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">
           {modeLabels[mode]}
         </p>
