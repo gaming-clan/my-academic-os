@@ -137,7 +137,7 @@ Ky projekt merr frymëzim konceptual dhe emërtimin nga template-t popullore **"
 
 ## 📄 Licenca & Autorësia
 
-Ky projekt lëshohet nën **Licencën MIT** — shiko skedarin [`LICENSE`](./LICENSE) për tekstin e plotë.
+Ky projekt lëshohet nën **Licencën MIT** — shiko skedarin [`LICENSE`](./LICENSE) për tekstin e plotë (ligjërisht të vlefshëm), ose [`LICENSE-sq.md`](./LICENSE-sq.md) për një përkthim shqip informativ.
 
 > ⚠️ **Shënim i rëndësishëm mbi pronësinë**: Ky projekt **nuk ka asnjë lidhje zyrtare, bashkëpunim, sponsorizim, miratim apo filial** me krijuesit e ndonjë template-i "Academic OS" në Notion, as me vetë kompaninë **Notion Labs, Inc.** Emri dhe koncepti u përdorën vetëm si **frymëzim i lirë**; ky është një projekt krejtësisht i pavarur, ndërtuar nga zero si aplikacion web më vete. Çdo e drejtë autori, markë tregtare apo pronësi intelektuale mbi template-t origjinalë të Notion-it i përket përkatësisht pronarëve/krijuesve të tyre dhe nuk pretendohet këtu në asnjë formë.
 
