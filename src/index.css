@@ -1,3 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @import "katex/dist/katex.min.css";
+
+/* Dark mode is toggled explicitly (light/dark/system) via a `dark` class on <html>,
+   instead of Tailwind's default prefers-color-scheme media query. */
+@custom-variant dark (&:where(.dark, .dark *));

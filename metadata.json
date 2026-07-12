@@ -1,6 +1,6 @@
 {
   "name": "Sistemi Im Akademik",
-  "description": "Një sistem akademik gjithëpërfshirës për të ndjekur lëndët, detyrat, notat (shkalla shqiptare 4-10), orarin, shënimet, detyrat dhe sesionet e produktivitetit pomodoro.",
+  "description": "Një sistem akademik gjithëpërfshirës, 100% lokal, për të ndjekur lëndët, detyrat, notat (shkalla shqiptare 4-10), orarin, shënimet, detyrat dhe sesionet e produktivitetit pomodoro.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

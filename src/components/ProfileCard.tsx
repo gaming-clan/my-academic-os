@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { User, GraduationCap, Hash, Users, Edit2, Check, X, ShieldAlert, BookOpen, School, IdCard } from 'lucide-react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { Profile } from '../types';
 
 interface ProfileCardProps {
-  userId: string | null;
   onAcademicLevelChange?: (level: Profile['academicLevel']) => void;
 }
 
@@ -19,7 +16,7 @@ const DEFAULT_PROFILE: Profile = {
   group: 'Grupi 3, Viti II'
 };
 
-export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCardProps) {
+export default function ProfileCard({ onAcademicLevelChange }: ProfileCardProps) {
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(DEFAULT_PROFILE.name);
@@ -29,54 +26,21 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
   const [editedStudentId, setEditedStudentId] = useState(DEFAULT_PROFILE.studentId || '');
   const [editedAmzaNumber, setEditedAmzaNumber] = useState(DEFAULT_PROFILE.amzaNumber || '');
   const [editedGroup, setEditedGroup] = useState(DEFAULT_PROFILE.group || '');
-  const [isLoading, setIsLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Load profile
+  // Load profile from LocalStorage
   useEffect(() => {
-    async function loadProfile() {
-      if (!userId) {
-        // Load from LocalStorage
-        const cached = localStorage.getItem('academic_os_profile');
-        if (cached) {
-          try {
-            setProfile(JSON.parse(cached));
-          } catch (e) {
-            setProfile(DEFAULT_PROFILE);
-          }
-        } else {
-          setProfile(DEFAULT_PROFILE);
-        }
-        return;
-      }
-
-      setIsLoading(true);
+    const cached = localStorage.getItem('academic_os_profile');
+    if (cached) {
       try {
-        const docRef = doc(db, 'profiles', userId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setProfile(docSnap.data() as Profile);
-        } else {
-          // If no cloud profile exists, write the local one or the default one
-          const cached = localStorage.getItem('academic_os_profile');
-          const initialProfile = cached ? JSON.parse(cached) : { ...DEFAULT_PROFILE, userId };
-          await setDoc(docRef, initialProfile);
-          setProfile(initialProfile);
-        }
-      } catch (error) {
-        console.error('Failed to load profile from Firestore:', error);
-        // Fallback to local
-        const cached = localStorage.getItem('academic_os_profile');
-        if (cached) {
-          setProfile(JSON.parse(cached));
-        }
-      } finally {
-        setIsLoading(false);
+        setProfile(JSON.parse(cached));
+      } catch (e) {
+        setProfile(DEFAULT_PROFILE);
       }
+    } else {
+      setProfile(DEFAULT_PROFILE);
     }
-
-    loadProfile();
-  }, [userId]);
+  }, []);
 
   // Let the parent know which academic level is active (used to gate university-only features)
   useEffect(() => {
@@ -101,7 +65,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
     setSaveError(null);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editedName.trim()) {
       setSaveError('Emri është i detyrueshëm.');
@@ -109,7 +73,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
     }
 
     const updatedProfile: Profile = {
-      userId: userId || 'local-user',
+      userId: 'local-user',
       name: editedName,
       academicLevel: editedAcademicLevel,
       institution: editedInstitution,
@@ -120,29 +84,10 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
       updatedAt: new Date().toISOString()
     };
 
-    setIsLoading(true);
+    localStorage.setItem('academic_os_profile', JSON.stringify(updatedProfile));
+    setProfile(updatedProfile);
+    setIsEditing(false);
     setSaveError(null);
-
-    try {
-      if (userId) {
-        const path = `profiles/${userId}`;
-        try {
-          await setDoc(doc(db, 'profiles', userId), updatedProfile);
-        } catch (err) {
-          handleFirestoreError(err, OperationType.WRITE, path);
-        }
-      }
-      
-      // Always cache locally as well
-      localStorage.setItem('academic_os_profile', JSON.stringify(updatedProfile));
-      setProfile(updatedProfile);
-      setIsEditing(false);
-    } catch (err: any) {
-      console.error('Error saving profile:', err);
-      setSaveError('Ruajtja e profilit dështoi. Kontrolloni kufizimet e fushave.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const isHighSchool = profile.academicLevel === 'Shkollë e Mesme';
@@ -292,7 +237,6 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
             </button>
             <button
               type="submit"
-              disabled={isLoading}
               className="px-2.5 py-1 text-xs bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all flex items-center gap-1 shadow-sm"
             >
               <Check className="w-3.5 h-3.5" /> Ruaj

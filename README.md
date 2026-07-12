@@ -1,20 +1,19 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
 # Sistemi Im Akademik
 
-Një hapësirë pune gjithëpërfshirëse për studentët dhe nxënësit shqiptarë, për të organizuar lëndët, detyrat, notat dhe shënimet e studimit — e përshtatur për sistemin arsimor shqiptar.
+Një hapësirë pune gjithëpërfshirëse, **100% lokale**, për studentët dhe nxënësit shqiptarë, për të organizuar lëndët, detyrat, notat dhe shënimet e studimit — e përshtatur për sistemin arsimor shqiptar.
+
+Të gjitha të dhënat ruhen vetëm në shfletuesin tuaj (`localStorage`); nuk ka llogari, identifikim apo sinkronizim në cloud.
 
 ## Karakteristikat
 
-- **Lëndët**: menaxhoni lëndët tuaja me kod, mësues/pedagog, semestër dhe progres të programit.
-- **Detyra & Notat**: ndiqni detyrat dhe provimet me peshë përqindjeje, dhe llogaritni automatikisht mesataren sipas **shkallës shqiptare 4-10** (Nota), me përshkrues cilësorë nga Mbetës deri në Shkëlqyeshëm.
+- **Lëndët**: menaxhoni lëndët tuaja me kod, mësues/pedagog, semestër, kredite ECTS (Universitet) dhe progres të programit.
+- **Detyra & Notat**: ndiqni detyrat dhe provimet me peshë përqindjeje, dhe llogaritni automatikisht mesataren sipas **shkallës shqiptare 4-10** (Nota), me përshkrues cilësorë nga Mbetës deri në Shkëlqyeshëm, përfshirë një konvertues pikë (0-100) → notë.
 - **Lista e Detyrave**: një listë e thjeshtë detyrash ditore, opsionalisht e lidhur me një lëndë.
-- **Shënime Studimi**: shënime në Markdown, të organizuara në kategori (Leksione, Laborator, Udhëzues Studimi, etj.).
+- **Shënime Studimi**: shënime në Markdown (me mbështetje LaTeX/KaTeX), të organizuara në kategori (Leksione, Laborator, Udhëzues Studimi, etj.).
 - **Kohëmatësi i Fokusit**: sesione studimi/pushimi në stilin Pomodoro.
 - **Ora e Tiranës**: ora dhe data aktuale sipas orës së Tiranës.
-- Sinkronizim opsional në cloud me Google Sign-In dhe Cloud Firestore; funksionon edhe jashtë linje duke përdorur `localStorage`.
+- **Temë**: e çelët, e errët, ose sipas sistemit.
+- **Aplikacion i instalueshëm**: mund të instalohet si aplikacion desktop ose mobile (PWA) dhe funksionon edhe jashtë linje.
 
 ## Run Locally
 
@@ -22,8 +21,5 @@ Një hapësirë pune gjithëpërfshirëse për studentët dhe nxënësit shqipta
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
-
-View your app in AI Studio: https://ai.studio/apps/6e33f03d-e4c2-4c61-a222-0912613a5a6c
