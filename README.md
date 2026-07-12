@@ -27,9 +27,9 @@
 
 ## 💡 Rreth Projektit
 
-**Sistemi Im Akademik** është një aplikacion ueb (React + TypeScript) i menduar posaçërisht për studentët e universiteteve dhe nxënësit e shkollave të mesme në Shqipëri. Ndryshe nga shumica e mjeteve të ngjashme (të ndërtuara zakonisht për sistemin amerikan), këtu gjithçka është përshtatur për realitetin tonë:
+**Sistemi Im Akademik** është një aplikacion web (React + TypeScript) i menduar posaçërisht për studentët e universiteteve dhe nxënësit e shkollave të mesme në Shqipëri. Ndryshe nga shumica e mjeteve të ngjashme (të ndërtuara zakonisht për sistemin amerikan), këtu gjithçka është përshtatur për realitetin tonë:
 
-- 📊 **Shkalla e notave 4-10** (jo GPA/letra amerikane)
+- 📊 **Shkalla e notave 4-10** (jo GPA/sistemi amerikan me shkronja)
 - 🎓 **Kredite ECTS** dhe mesatare e ponderuar për Universitetin
 - 🏫 Terminologji shqip: Semestri, Lënda, Pedagogu/Mësuesi, Numri i Amzës, etj.
 
@@ -63,7 +63,7 @@ Ora dhe data aktuale, gjithmonë sipas orës zyrtare të Tiranës — pavarësis
 Ndrysho temën me një klikim, ose lëre të ndjekë automatikisht preferencën e sistemit tënd.
 
 ### 📱 Aplikacion i Instalueshëm (PWA)
-Mund të instalohet si aplikacion i vërtetë desktop ose mobil, dhe funksionon edhe pa internet (falë një *service worker*-i që ruan aplikacionin lokalisht).
+Mund të instalohet si aplikacion i vërtetë desktop ose mobile, dhe funksionon edhe pa internet (falë një *service worker*-i që ruan aplikacionin lokalisht).
 
 ### 👤 Profili i Studentit/Nxënësit
 Fusha të përshtatura sipas nivelit arsimor: Universitet (Nr. Studentit, Grupi, Universiteti) ose Shkollë e Mesme (Nr. Nxënësit, Klasa/Paralelja, Numri i Amzës).
