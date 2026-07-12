@@ -1,25 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  collection,
-  onSnapshot,
-  doc,
-  setDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   GraduationCap,
   Sparkles,
-  Cloud,
-  CloudOff,
-  LogOut,
-  UserCheck,
   Plus,
   BookOpen,
   CheckCircle,
@@ -30,12 +13,17 @@ import {
   AlertCircle,
   Maximize,
   Minimize,
+  Sun,
+  Moon,
+  Monitor,
+  Download,
 } from 'lucide-react';
 
-import { db, auth, googleProvider, handleFirestoreError, OperationType } from './firebase';
 import { Course, Assignment, Note, Task, Profile } from './types';
 import coverImage from './assets/images/academic_os_cover_1783785015939.jpg';
 import { useFullscreen } from './hooks/useFullscreen';
+import { useTheme } from './hooks/useTheme';
+import { usePWAInstall } from './hooks/usePWAInstall';
 
 // Import our modular widgets and components
 import ClockWidget from './components/ClockWidget';
@@ -136,10 +124,7 @@ const SEED_NOTES: Note[] = [
 type ActiveTab = 'detyra' | 'vleresime' | 'shenime';
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // Core database collections
+  // Core database collections (persisted only in this browser's localStorage)
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -157,160 +142,42 @@ export default function App() {
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
-  // App-wide fullscreen toggle
+  // App-wide fullscreen toggle, theme, and installability (desktop/mobile "app" affordances)
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
+  const { theme, cycleTheme } = useTheme();
+  const { isInstallable, promptInstall } = usePWAInstall();
 
-  // Track Auth state
+  // Load data from LocalStorage (seed it on first run)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
+    const cachedCourses = localStorage.getItem('academic_os_courses');
+    const cachedAssignments = localStorage.getItem('academic_os_assignments');
+    const cachedNotes = localStorage.getItem('academic_os_notes');
+    const cachedTasks = localStorage.getItem('academic_os_tasks');
+
+    if (cachedCourses) {
+      setCourses(JSON.parse(cachedCourses));
+      setAssignments(cachedAssignments ? JSON.parse(cachedAssignments) : []);
+      setNotes(cachedNotes ? JSON.parse(cachedNotes) : []);
+      setTasks(cachedTasks ? JSON.parse(cachedTasks) : []);
+    } else {
+      localStorage.setItem('academic_os_courses', JSON.stringify(SEED_COURSES));
+      localStorage.setItem('academic_os_assignments', JSON.stringify(SEED_ASSIGNMENTS));
+      localStorage.setItem('academic_os_notes', JSON.stringify(SEED_NOTES));
+      localStorage.setItem('academic_os_tasks', JSON.stringify(SEED_TASKS));
+
+      setCourses(SEED_COURSES);
+      setAssignments(SEED_ASSIGNMENTS);
+      setNotes(SEED_NOTES);
+      setTasks(SEED_TASKS);
+    }
   }, []);
 
-  // Sync data (Firestore vs LocalStorage)
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (!user) {
-      // Local state - Load cache
-      const cachedCourses = localStorage.getItem('academic_os_courses');
-      const cachedAssignments = localStorage.getItem('academic_os_assignments');
-      const cachedNotes = localStorage.getItem('academic_os_notes');
-      const cachedTasks = localStorage.getItem('academic_os_tasks');
-
-      if (cachedCourses) {
-        setCourses(JSON.parse(cachedCourses));
-        setAssignments(cachedAssignments ? JSON.parse(cachedAssignments) : []);
-        setNotes(cachedNotes ? JSON.parse(cachedNotes) : []);
-        setTasks(cachedTasks ? JSON.parse(cachedTasks) : []);
-      } else {
-        // Seed first-time local state
-        localStorage.setItem('academic_os_courses', JSON.stringify(SEED_COURSES));
-        localStorage.setItem('academic_os_assignments', JSON.stringify(SEED_ASSIGNMENTS));
-        localStorage.setItem('academic_os_notes', JSON.stringify(SEED_NOTES));
-        localStorage.setItem('academic_os_tasks', JSON.stringify(SEED_TASKS));
-
-        setCourses(SEED_COURSES);
-        setAssignments(SEED_ASSIGNMENTS);
-        setNotes(SEED_NOTES);
-        setTasks(SEED_TASKS);
-      }
-      return;
-    }
-
-    // ONLINE MODE: Fetch from Firestore
-    const uid = user.uid;
-
-    const pathCourses = 'courses';
-    const unsubCourses = onSnapshot(
-      query(collection(db, pathCourses), where('userId', '==', uid)),
-      async (snap) => {
-        const list: Course[] = [];
-        snap.forEach((d) => list.push({ ...d.data(), id: d.id } as Course));
-
-        if (list.length === 0) {
-          // Sync seed data to user's first cloud login
-          try {
-            for (const c of SEED_COURSES) {
-              await setDoc(doc(db, 'courses', c.id), { ...c, userId: uid });
-            }
-            for (const a of SEED_ASSIGNMENTS) {
-              await setDoc(doc(db, 'assignments', a.id), { ...a, userId: uid });
-            }
-            for (const n of SEED_NOTES) {
-              await setDoc(doc(db, 'notes', n.id), { ...n, userId: uid });
-            }
-            for (const t of SEED_TASKS) {
-              await setDoc(doc(db, 'tasks', t.id), { ...t, userId: uid });
-            }
-          } catch (e) {
-            console.error('Error writing cloud seed data:', e);
-          }
-        } else {
-          setCourses(list);
-        }
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, pathCourses);
-      }
-    );
-
-    const pathAssignments = 'assignments';
-    const unsubAssignments = onSnapshot(
-      query(collection(db, pathAssignments), where('userId', '==', uid)),
-      (snap) => {
-        const list: Assignment[] = [];
-        snap.forEach((d) => list.push({ ...d.data(), id: d.id } as Assignment));
-        setAssignments(list);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, pathAssignments);
-      }
-    );
-
-    const pathNotes = 'notes';
-    const unsubNotes = onSnapshot(
-      query(collection(db, pathNotes), where('userId', '==', uid)),
-      (snap) => {
-        const list: Note[] = [];
-        snap.forEach((d) => list.push({ ...d.data(), id: d.id } as Note));
-        setNotes(list);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, pathNotes);
-      }
-    );
-
-    const pathTasks = 'tasks';
-    const unsubTasks = onSnapshot(
-      query(collection(db, pathTasks), where('userId', '==', uid)),
-      (snap) => {
-        const list: Task[] = [];
-        snap.forEach((d) => list.push({ ...d.data(), id: d.id } as Task));
-        setTasks(list);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.LIST, pathTasks);
-      }
-    );
-
-    return () => {
-      unsubCourses();
-      unsubAssignments();
-      unsubNotes();
-      unsubTasks();
-    };
-  }, [user, authLoading]);
-
-  // Auth controls
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (e) {
-      console.error('Google Sign In failed:', e);
-    }
-  };
-
-  const handleLogout = async () => {
-    if (confirm('Jeni i sigurt që doni të dilni?')) {
-      await signOut(auth);
-      setCourses([]);
-      setAssignments([]);
-      setNotes([]);
-      setTasks([]);
-      setSelectedCourseId(null);
-    }
-  };
-
   // Course handlers
-  const handleSaveCourse = async (courseData: Partial<Course>) => {
-    const uid = user ? user.uid : 'local-user';
+  const handleSaveCourse = (courseData: Partial<Course>) => {
     const courseId = courseData.id || `course-${Date.now()}`;
     const newCourse: Course = {
       id: courseId,
-      userId: uid,
+      userId: 'local-user',
       name: courseData.name || '',
       code: courseData.code || '',
       instructor: courseData.instructor || '',
@@ -321,49 +188,30 @@ export default function App() {
       createdAt: new Date().toISOString(),
     };
 
-    if (user) {
-      const path = `courses/${courseId}`;
-      try {
-        await setDoc(doc(db, 'courses', courseId), newCourse);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, path);
-      }
-    } else {
-      const updated = editingCourse
-        ? courses.map((c) => (c.id === editingCourse.id ? newCourse : c))
-        : [...courses, newCourse];
-      setCourses(updated);
-      localStorage.setItem('academic_os_courses', JSON.stringify(updated));
-    }
+    const updated = editingCourse
+      ? courses.map((c) => (c.id === editingCourse.id ? newCourse : c))
+      : [...courses, newCourse];
+    setCourses(updated);
+    localStorage.setItem('academic_os_courses', JSON.stringify(updated));
     setIsCourseModalOpen(false);
     setEditingCourse(null);
   };
 
-  const handleDeleteCourse = async (courseId: string) => {
+  const handleDeleteCourse = (courseId: string) => {
     if (!confirm('Jeni i sigurt që doni ta fshini këtë lëndë? Të dhënat e lidhura do të mbeten por të pashkëputura.')) return;
 
-    if (user) {
-      const path = `courses/${courseId}`;
-      try {
-        await deleteDoc(doc(db, 'courses', courseId));
-      } catch (err) {
-        handleFirestoreError(err, OperationType.DELETE, path);
-      }
-    } else {
-      const updated = courses.filter((c) => c.id !== courseId);
-      setCourses(updated);
-      localStorage.setItem('academic_os_courses', JSON.stringify(updated));
-    }
+    const updated = courses.filter((c) => c.id !== courseId);
+    setCourses(updated);
+    localStorage.setItem('academic_os_courses', JSON.stringify(updated));
     if (selectedCourseId === courseId) setSelectedCourseId(null);
   };
 
   // Tasks handlers
-  const handleAddTask = async (taskData: Partial<Task>) => {
-    const uid = user ? user.uid : 'local-user';
+  const handleAddTask = (taskData: Partial<Task>) => {
     const taskId = `task-${Date.now()}`;
     const newTask: Task = {
       id: taskId,
-      userId: uid,
+      userId: 'local-user',
       courseId: taskData.courseId,
       title: taskData.title || '',
       status: 'Pa Filluar',
@@ -371,57 +219,29 @@ export default function App() {
       createdAt: new Date().toISOString(),
     };
 
-    if (user) {
-      const path = `tasks/${taskId}`;
-      try {
-        await setDoc(doc(db, 'tasks', taskId), newTask);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, path);
-      }
-    } else {
-      const updated = [...tasks, newTask];
-      setTasks(updated);
-      localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
-    }
+    const updated = [...tasks, newTask];
+    setTasks(updated);
+    localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
   };
 
-  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
-    if (user) {
-      const path = `tasks/${taskId}`;
-      try {
-        await updateDoc(doc(db, 'tasks', taskId), updates);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, path);
-      }
-    } else {
-      const updated = tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
-      setTasks(updated);
-      localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
-    }
+  const handleUpdateTask = (taskId: string, updates: Partial<Task>) => {
+    const updated = tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
+    setTasks(updated);
+    localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
   };
 
-  const handleDeleteTask = async (taskId: string) => {
-    if (user) {
-      const path = `tasks/${taskId}`;
-      try {
-        await deleteDoc(doc(db, 'tasks', taskId));
-      } catch (err) {
-        handleFirestoreError(err, OperationType.DELETE, path);
-      }
-    } else {
-      const updated = tasks.filter((t) => t.id !== taskId);
-      setTasks(updated);
-      localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
-    }
+  const handleDeleteTask = (taskId: string) => {
+    const updated = tasks.filter((t) => t.id !== taskId);
+    setTasks(updated);
+    localStorage.setItem('academic_os_tasks', JSON.stringify(updated));
   };
 
   // Assignments handlers
-  const handleAddAssignment = async (assignData: Partial<Assignment>) => {
-    const uid = user ? user.uid : 'local-user';
+  const handleAddAssignment = (assignData: Partial<Assignment>) => {
     const assignId = `assign-${Date.now()}`;
     const newAssign: Assignment = {
       id: assignId,
-      userId: uid,
+      userId: 'local-user',
       courseId: assignData.courseId || '',
       title: assignData.title || '',
       dueDate: assignData.dueDate,
@@ -431,57 +251,29 @@ export default function App() {
       createdAt: new Date().toISOString(),
     };
 
-    if (user) {
-      const path = `assignments/${assignId}`;
-      try {
-        await setDoc(doc(db, 'assignments', assignId), newAssign);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, path);
-      }
-    } else {
-      const updated = [...assignments, newAssign];
-      setAssignments(updated);
-      localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
-    }
+    const updated = [...assignments, newAssign];
+    setAssignments(updated);
+    localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
   };
 
-  const handleUpdateAssignment = async (assignId: string, updates: Partial<Assignment>) => {
-    if (user) {
-      const path = `assignments/${assignId}`;
-      try {
-        await updateDoc(doc(db, 'assignments', assignId), updates);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, path);
-      }
-    } else {
-      const updated = assignments.map((a) => (a.id === assignId ? { ...a, ...updates } : a));
-      setAssignments(updated);
-      localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
-    }
+  const handleUpdateAssignment = (assignId: string, updates: Partial<Assignment>) => {
+    const updated = assignments.map((a) => (a.id === assignId ? { ...a, ...updates } : a));
+    setAssignments(updated);
+    localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
   };
 
-  const handleDeleteAssignment = async (assignId: string) => {
-    if (user) {
-      const path = `assignments/${assignId}`;
-      try {
-        await deleteDoc(doc(db, 'assignments', assignId));
-      } catch (err) {
-        handleFirestoreError(err, OperationType.DELETE, path);
-      }
-    } else {
-      const updated = assignments.filter((a) => a.id !== assignId);
-      setAssignments(updated);
-      localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
-    }
+  const handleDeleteAssignment = (assignId: string) => {
+    const updated = assignments.filter((a) => a.id !== assignId);
+    setAssignments(updated);
+    localStorage.setItem('academic_os_assignments', JSON.stringify(updated));
   };
 
   // Notes handlers
-  const handleAddNote = async (noteData: Partial<Note>) => {
-    const uid = user ? user.uid : 'local-user';
+  const handleAddNote = (noteData: Partial<Note>) => {
     const noteId = `note-${Date.now()}`;
     const newNote: Note = {
       id: noteId,
-      userId: uid,
+      userId: 'local-user',
       courseId: noteData.courseId || '',
       title: noteData.title || '',
       content: noteData.content || '',
@@ -490,49 +282,25 @@ export default function App() {
       updatedAt: new Date().toISOString(),
     };
 
-    if (user) {
-      const path = `notes/${noteId}`;
-      try {
-        await setDoc(doc(db, 'notes', noteId), newNote);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, path);
-      }
-    } else {
-      const updated = [...notes, newNote];
-      setNotes(updated);
-      localStorage.setItem('academic_os_notes', JSON.stringify(updated));
-    }
+    const updated = [...notes, newNote];
+    setNotes(updated);
+    localStorage.setItem('academic_os_notes', JSON.stringify(updated));
   };
 
-  const handleUpdateNote = async (noteId: string, updates: Partial<Note>) => {
-    if (user) {
-      const path = `notes/${noteId}`;
-      try {
-        await updateDoc(doc(db, 'notes', noteId), updates);
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, path);
-      }
-    } else {
-      const updated = notes.map((n) => (n.id === noteId ? { ...n, ...updates } : n));
-      setNotes(updated);
-      localStorage.setItem('academic_os_notes', JSON.stringify(updated));
-    }
+  const handleUpdateNote = (noteId: string, updates: Partial<Note>) => {
+    const updated = notes.map((n) => (n.id === noteId ? { ...n, ...updates } : n));
+    setNotes(updated);
+    localStorage.setItem('academic_os_notes', JSON.stringify(updated));
   };
 
-  const handleDeleteNote = async (noteId: string) => {
-    if (user) {
-      const path = `notes/${noteId}`;
-      try {
-        await deleteDoc(doc(db, 'notes', noteId));
-      } catch (err) {
-        handleFirestoreError(err, OperationType.DELETE, path);
-      }
-    } else {
-      const updated = notes.filter((n) => n.id !== noteId);
-      setNotes(updated);
-      localStorage.setItem('academic_os_notes', JSON.stringify(updated));
-    }
+  const handleDeleteNote = (noteId: string) => {
+    const updated = notes.filter((n) => n.id !== noteId);
+    setNotes(updated);
+    localStorage.setItem('academic_os_notes', JSON.stringify(updated));
   };
+
+  const themeTitle =
+    theme === 'light' ? 'Tema: E Çelët (kliko për të errët)' : theme === 'dark' ? 'Tema: E Errët (kliko për sistemin)' : 'Tema: Sipas Sistemit (kliko për të çelët)';
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 flex flex-col">
@@ -545,8 +313,25 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
 
-        {/* Top-right Authentication Controls */}
+        {/* Top-right App Controls: install, theme, fullscreen */}
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          {isInstallable && (
+            <button
+              onClick={promptInstall}
+              className="flex items-center gap-1.5 bg-white hover:bg-zinc-50 text-zinc-900 font-semibold px-3 py-2 rounded-xl shadow-lg border border-zinc-200 text-xs transition-all cursor-pointer"
+              title="Instalo Aplikacionin"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-600" />
+              Instalo
+            </button>
+          )}
+          <button
+            onClick={cycleTheme}
+            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg"
+            title={themeTitle}
+          >
+            {theme === 'light' ? <Sun className="w-4 h-4" /> : theme === 'dark' ? <Moon className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+          </button>
           <button
             onClick={toggleFullscreen}
             className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg"
@@ -554,29 +339,6 @@ export default function App() {
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </button>
-          {authLoading ? (
-            <div className="w-8 h-8 rounded-full bg-zinc-800 animate-pulse" />
-          ) : user ? (
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-2xl pl-3 pr-2 py-1.5 border border-white/10 text-white shadow-lg">
-              <UserCheck className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold">{user.displayName || 'I Sinkronizuar'}</span>
-              <button
-                onClick={handleLogout}
-                className="p-1 rounded-lg hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
-                title="Dilni"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleGoogleLogin}
-              className="flex items-center gap-1.5 bg-white hover:bg-zinc-50 text-zinc-900 font-semibold px-4 py-2 rounded-2xl shadow-lg border border-zinc-200 text-xs transition-all cursor-pointer"
-            >
-              <Cloud className="w-3.5 h-3.5 text-blue-500 animate-bounce" />
-              Lidhu me Google
-            </button>
-          )}
         </div>
 
         {/* Bottom banner details: Graduation hat and OS Title */}
@@ -597,27 +359,11 @@ export default function App() {
 
       {/* Main Content Dashboard Layout */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 md:px-8 py-8 space-y-8">
-        {/* Sync Reminder Banner */}
-        {!user && !authLoading && (
-          <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-400 p-3 rounded-2xl text-xs font-medium">
-            <div className="flex items-center gap-2">
-              <CloudOff className="w-4 h-4 text-amber-500" />
-              <span>Aktualisht jeni në modalitetin Lokal Jashtë Linje. Lidhuni me Google për sinkronizim të vazhdueshëm në cloud.</span>
-            </div>
-            <button
-              onClick={handleGoogleLogin}
-              className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-xl shadow-xs transition-all font-semibold"
-            >
-              Identifikohu
-            </button>
-          </div>
-        )}
-
         {/* 2. Top-level Bento Grid Widgets */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <ClockWidget />
           <PomodoroTimer />
-          <ProfileCard userId={user ? user.uid : null} onAcademicLevelChange={setAcademicLevel} />
+          <ProfileCard onAcademicLevelChange={setAcademicLevel} />
         </div>
 
         {/* 3. "Classes & Subjects" Gallery */}
@@ -777,7 +523,7 @@ export default function App() {
 
       {/* Footer credits bar */}
       <footer className="border-t border-zinc-200/50 dark:border-zinc-800/50 py-6 mt-12 bg-white/40 dark:bg-zinc-950/10 flex items-center justify-center text-[11px] font-mono text-zinc-400 dark:text-zinc-500">
-        Sistemi Akademik • Ndërtuar me React, Tailwind &amp; Cloud Firestore
+        Sistemi Akademik • 100% Lokal — të dhënat ruhen vetëm në këtë pajisje
       </footer>
     </div>
   );
