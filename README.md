@@ -133,12 +133,12 @@ Nuk ka llogari, nuk ka identifikim, nuk ka asnjë server apo bazë të dhënash 
 
 ## 🙏 Frymëzimi & Falënderimet
 
-Ky projekt merr frymëzim konceptual dhe emërtimin nga template-t popullore **"Academic OS"** që qarkullojnë në tregun e template-ve të Notion-it. Përtej idesë dhe emrit, **i gjithë kodi, dizajni, funksionalitetet dhe përshtatja për sistemin arsimor shqiptar janë krijuar plotësisht nga e para**, si një aplikacion i pavarur ueb (jo një template Notion).
+Ky projekt merr frymëzim konceptual dhe emërtimin nga template-t popullore **"Academic OS"** që qarkullojnë në tregun e template-ve të Notion-it. Përtej idesë dhe emrit, **i gjithë kodi, dizajni, funksionalitetet dhe përshtatja për sistemin arsimor shqiptar janë krijuar plotësisht nga e para**, si një aplikacion i pavarur web (jo një template Notion).
 
 ## 📄 Licenca & Autorësia
 
 Ky projekt lëshohet nën **Licencën MIT** — shiko skedarin [`LICENSE`](./LICENSE) për tekstin e plotë.
 
-> ⚠️ **Shënim i rëndësishëm mbi pronësinë**: Ky projekt **nuk ka asnjë lidhje zyrtare, bashkëpunim, sponsorizim, miratim apo afiliim** me krijuesit e ndonjë template-i "Academic OS" në Notion, as me vetë kompaninë **Notion Labs, Inc.** Emri dhe koncepti u përdorën vetëm si **frymëzim i lirë**; ky është një projekt krejtësisht i pavarur, ndërtuar nga zero si aplikacion ueb më vete. Çdo e drejtë autori, markë tregtare apo pronësi intelektuale mbi template-t origjinalë të Notion-it i përket përkatësisht pronarëve/krijuesve të tyre dhe nuk pretendohet këtu në asnjë formë.
+> ⚠️ **Shënim i rëndësishëm mbi pronësinë**: Ky projekt **nuk ka asnjë lidhje zyrtare, bashkëpunim, sponsorizim, miratim apo filial** me krijuesit e ndonjë template-i "Academic OS" në Notion, as me vetë kompaninë **Notion Labs, Inc.** Emri dhe koncepti u përdorën vetëm si **frymëzim i lirë**; ky është një projekt krejtësisht i pavarur, ndërtuar nga zero si aplikacion web më vete. Çdo e drejtë autori, markë tregtare apo pronësi intelektuale mbi template-t origjinalë të Notion-it i përket përkatësisht pronarëve/krijuesve të tyre dhe nuk pretendohet këtu në asnjë formë.
 
 Copyright © 2026 Dario Lloshi. Të gjitha të drejtat sipas Licencës MIT.
