@@ -1,6 +1,6 @@
 # === NDRYSHO VETËM KËTË RRESHT ===
 # Vendos këtu rrugën e plotë ku ke bërë 'git clone' të projektit my-academic-os
-$projectPath = "C:\Path\To\my-academic-os"
+$projectPath = "C:\my-academic-os"
 # ==================================
 
 $port = 3000
