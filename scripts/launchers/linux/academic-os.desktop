@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Sistemi Im Akademik
+Comment=Nis dev-server-in lokal (nëse s'është duke punuar) dhe hap aplikacionin në browser
+Exec=bash -c "$HOME/.local/bin/start-academic-os.sh"
+Icon=accessories-text-editor
+Terminal=false
+Categories=Education;
+X-GNOME-Autostart-enabled=true
