@@ -51,6 +51,7 @@ export interface Profile {
   institution?: string; // Name of the high school or university
   program?: string;
   studentId?: string;
+  amzaNumber?: string; // Numri i Amzës (numri i aktit të lindjes në Gjendjen Civile)
   group?: string;
   updatedAt?: string;
 }

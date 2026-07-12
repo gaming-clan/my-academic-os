@@ -75,6 +75,7 @@
         "name": { "type": "string", "description": "Student's name", "maxLength": 100 },
         "program": { "type": "string", "description": "Academic program", "maxLength": 150 },
         "studentId": { "type": "string", "description": "Student identification number", "maxLength": 50 },
+        "amzaNumber": { "type": "string", "description": "Numri i Amzës (birth act registry number from Gjendja Civile)", "maxLength": 50 },
         "group": { "type": "string", "description": "Student study group/class", "maxLength": 50 },
         "updatedAt": { "type": "string", "format": "date-time" }
       },

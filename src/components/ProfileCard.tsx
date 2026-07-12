@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, GraduationCap, Hash, Users, Edit2, Check, X, ShieldAlert, BookOpen, School } from 'lucide-react';
+import { User, GraduationCap, Hash, Users, Edit2, Check, X, ShieldAlert, BookOpen, School, IdCard } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, OperationType } from '../firebase';
 import { Profile } from '../types';
@@ -16,6 +16,7 @@ const DEFAULT_PROFILE: Profile = {
   institution: 'Universiteti i Tiranës',
   program: 'Inxhinieri Informatike',
   studentId: 'ST-20231045',
+  amzaNumber: '245/2003',
   group: 'Grupi 3, Viti II'
 };
 
@@ -27,6 +28,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
   const [editedInstitution, setEditedInstitution] = useState(DEFAULT_PROFILE.institution || '');
   const [editedProgram, setEditedProgram] = useState(DEFAULT_PROFILE.program || '');
   const [editedStudentId, setEditedStudentId] = useState(DEFAULT_PROFILE.studentId || '');
+  const [editedAmzaNumber, setEditedAmzaNumber] = useState(DEFAULT_PROFILE.amzaNumber || '');
   const [editedGroup, setEditedGroup] = useState(DEFAULT_PROFILE.group || '');
   const [isLoading, setIsLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -89,6 +91,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
     setEditedInstitution(profile.institution || '');
     setEditedProgram(profile.program || '');
     setEditedStudentId(profile.studentId || '');
+    setEditedAmzaNumber(profile.amzaNumber || '');
     setEditedGroup(profile.group || '');
     setSaveError(null);
     setIsEditing(true);
@@ -113,6 +116,7 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
       institution: editedInstitution,
       program: editedProgram,
       studentId: editedStudentId,
+      amzaNumber: editedAmzaNumber,
       group: editedGroup,
       updatedAt: new Date().toISOString()
     };
@@ -245,6 +249,17 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
               />
             </div>
             <div className="col-span-2">
+              <label className="text-[10px] uppercase font-mono text-zinc-400">Numri i Amzës</label>
+              <input
+                type="text"
+                value={editedAmzaNumber}
+                onChange={(e) => setEditedAmzaNumber(e.target.value)}
+                maxLength={50}
+                placeholder="p.sh. 245/2003"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div className="col-span-2">
               <label className="text-[10px] uppercase font-mono text-zinc-400">
                 {editedAcademicLevel === 'Shkollë e Mesme' ? 'Klasa / Paralelja' : 'Grupi i Studimit'}
               </label>
@@ -332,6 +347,16 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
                 </p>
                 <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
                   {profile.studentId || 'I paplotësuar'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 col-span-2">
+              <IdCard className="w-4 h-4 text-zinc-400" />
+              <div>
+                <p className="text-[10px] text-zinc-400 font-mono leading-none">NUMRI I AMZËS</p>
+                <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
+                  {profile.amzaNumber || 'I paplotësuar'}
                 </p>
               </div>
             </div>
