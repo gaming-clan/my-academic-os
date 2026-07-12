@@ -51,7 +51,7 @@ export interface Profile {
   institution?: string; // Name of the high school or university
   program?: string;
   studentId?: string;
-  amzaNumber?: string; // Numri i Amzës (numri i aktit të lindjes në Gjendjen Civile)
+  amzaNumber?: string; // Numri i Amzës: identifikues nga libri amë i shkollës, përdoret vetëm në arsimin parauniversitar (Shkollë e Mesme); në universitet përdoret "Nr. i Studentit" (numri i matrikullimit)
   group?: string;
   updatedAt?: string;
 }

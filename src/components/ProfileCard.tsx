@@ -16,7 +16,6 @@ const DEFAULT_PROFILE: Profile = {
   institution: 'Universiteti i Tiranës',
   program: 'Inxhinieri Informatike',
   studentId: 'ST-20231045',
-  amzaNumber: '245/2003',
   group: 'Grupi 3, Viti II'
 };
 
@@ -248,17 +247,19 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
                 className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
               />
             </div>
-            <div className="col-span-2">
-              <label className="text-[10px] uppercase font-mono text-zinc-400">Numri i Amzës</label>
-              <input
-                type="text"
-                value={editedAmzaNumber}
-                onChange={(e) => setEditedAmzaNumber(e.target.value)}
-                maxLength={50}
-                placeholder="p.sh. 245/2003"
-                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
+            {editedAcademicLevel === 'Shkollë e Mesme' && (
+              <div className="col-span-2">
+                <label className="text-[10px] uppercase font-mono text-zinc-400">Numri i Amzës</label>
+                <input
+                  type="text"
+                  value={editedAmzaNumber}
+                  onChange={(e) => setEditedAmzaNumber(e.target.value)}
+                  maxLength={50}
+                  placeholder="p.sh. 245/2003"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-2 py-1 text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            )}
             <div className="col-span-2">
               <label className="text-[10px] uppercase font-mono text-zinc-400">
                 {editedAcademicLevel === 'Shkollë e Mesme' ? 'Klasa / Paralelja' : 'Grupi i Studimit'}
@@ -351,15 +352,17 @@ export default function ProfileCard({ userId, onAcademicLevelChange }: ProfileCa
               </div>
             </div>
 
-            <div className="flex items-center gap-2 col-span-2">
-              <IdCard className="w-4 h-4 text-zinc-400" />
-              <div>
-                <p className="text-[10px] text-zinc-400 font-mono leading-none">NUMRI I AMZËS</p>
-                <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
-                  {profile.amzaNumber || 'I paplotësuar'}
-                </p>
+            {isHighSchool && (
+              <div className="flex items-center gap-2 col-span-2">
+                <IdCard className="w-4 h-4 text-zinc-400" />
+                <div>
+                  <p className="text-[10px] text-zinc-400 font-mono leading-none">NUMRI I AMZËS</p>
+                  <p className="font-medium text-zinc-700 dark:text-zinc-300 mt-0.5">
+                    {profile.amzaNumber || 'I paplotësuar'}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex items-center gap-2 col-span-2">
               <Users className="w-4 h-4 text-zinc-400" />
