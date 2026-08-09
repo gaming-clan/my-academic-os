@@ -110,13 +110,16 @@ my-academic-os/
 
 ## 🚀 Nisja Lokale
 
-**Parakushte:** [Node.js](https://nodejs.org/)
+**Parakushte:** [Node.js](https://nodejs.org/) dhe [Python 3.10+](https://www.python.org/downloads/)
 
 ```bash
 # 1. Instalo varësitë
 npm install
 
-# 2. Nis serverin e zhvillimit
+# 2. Instalo varësitë Python për MarkItDown
+python -m pip install -r requirements.txt
+
+# 3. Nis serverin e zhvillimit
 npm run dev
 ```
 
