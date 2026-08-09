@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Folder, Book, FileText, Search, Edit3, Eye, Trash2, Calendar, Layout, ChevronRight, Check } from 'lucide-react';
+import { Plus, Folder, Book, FileText, Search, Edit3, Eye, Trash2, Calendar, Layout, ChevronRight, Check, FileUp, Upload } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { Note, Course } from '../types';
+import MaterialUploaderModal from './MaterialUploaderModal';
 
 interface NoteEditorProps {
   notes: Note[];
@@ -14,7 +15,7 @@ interface NoteEditorProps {
   selectedCourseId: string | null;
 }
 
-const FOLDERS = ['Shënime Klase', 'Udhëzues Studimi', 'Detyra Shtëpie', 'Laborator', 'Leksione', 'Të Përgjithshme'];
+const FOLDERS = ['Libër Mësimor', 'Material Mësimor', 'Shënime Klase', 'Udhëzues Studimi', 'Detyra Shtëpie', 'Laborator', 'Leksione', 'Të Përgjithshme'];
 
 export default function NoteEditor({
   notes,
@@ -28,6 +29,7 @@ export default function NoteEditor({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(true);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   // Form states for the currently active note
   const [title, setTitle] = useState('');
@@ -124,12 +126,21 @@ export default function NoteEditor({
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 font-mono">
               Shënime Studimi
             </span>
-            <button
-              onClick={handleCreateNote}
-              className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex items-center gap-1 text-[10px] font-bold"
-            >
-              <Plus className="w-3.5 h-3.5" /> Shto Shënim
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setIsUploadModalOpen(true)}
+                className="p-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white transition-all shadow-sm flex items-center gap-1 text-[10px] font-bold"
+                title="Ngarko materiale mësimore (libra, shënime etj.)"
+              >
+                <Upload className="w-3.5 h-3.5" /> Materiale
+              </button>
+              <button
+                onClick={handleCreateNote}
+                className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex items-center gap-1 text-[10px] font-bold"
+              >
+                <Plus className="w-3.5 h-3.5" /> Shto Shënim
+              </button>
+            </div>
           </div>
 
           <div className="relative">
@@ -374,6 +385,14 @@ export default function NoteEditor({
           </div>
         )}
       </div>
+
+      <MaterialUploaderModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        courses={courses}
+        selectedCourseId={selectedCourseId}
+        onAddNote={onAddNote}
+      />
     </div>
   );
 }

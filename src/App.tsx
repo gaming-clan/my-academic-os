@@ -27,6 +27,7 @@ import { usePWAInstall } from './hooks/usePWAInstall';
 
 // Import our modular widgets and components
 import ClockWidget from './components/ClockWidget';
+import CountdownWidget from './components/CountdownWidget';
 import PomodoroTimer from './components/PomodoroTimer';
 import ProfileCard from './components/ProfileCard';
 import CourseCard, { CourseModal } from './components/CourseCard';
@@ -149,22 +150,35 @@ export default function App() {
 
   // Load data from LocalStorage (seed it on first run)
   useEffect(() => {
-    const cachedCourses = localStorage.getItem('academic_os_courses');
-    const cachedAssignments = localStorage.getItem('academic_os_assignments');
-    const cachedNotes = localStorage.getItem('academic_os_notes');
-    const cachedTasks = localStorage.getItem('academic_os_tasks');
+    try {
+      const cachedCourses = localStorage.getItem('academic_os_courses');
+      const cachedAssignments = localStorage.getItem('academic_os_assignments');
+      const cachedNotes = localStorage.getItem('academic_os_notes');
+      const cachedTasks = localStorage.getItem('academic_os_tasks');
 
-    if (cachedCourses) {
-      setCourses(JSON.parse(cachedCourses));
-      setAssignments(cachedAssignments ? JSON.parse(cachedAssignments) : []);
-      setNotes(cachedNotes ? JSON.parse(cachedNotes) : []);
-      setTasks(cachedTasks ? JSON.parse(cachedTasks) : []);
-    } else {
-      localStorage.setItem('academic_os_courses', JSON.stringify(SEED_COURSES));
-      localStorage.setItem('academic_os_assignments', JSON.stringify(SEED_ASSIGNMENTS));
-      localStorage.setItem('academic_os_notes', JSON.stringify(SEED_NOTES));
-      localStorage.setItem('academic_os_tasks', JSON.stringify(SEED_TASKS));
+      if (cachedCourses) {
+        const parsedCourses = JSON.parse(cachedCourses);
+        const parsedAssignments = cachedAssignments ? JSON.parse(cachedAssignments) : [];
+        const parsedNotes = cachedNotes ? JSON.parse(cachedNotes) : [];
+        const parsedTasks = cachedTasks ? JSON.parse(cachedTasks) : [];
 
+        setCourses(Array.isArray(parsedCourses) ? parsedCourses : SEED_COURSES);
+        setAssignments(Array.isArray(parsedAssignments) ? parsedAssignments : SEED_ASSIGNMENTS);
+        setNotes(Array.isArray(parsedNotes) ? parsedNotes : SEED_NOTES);
+        setTasks(Array.isArray(parsedTasks) ? parsedTasks : SEED_TASKS);
+      } else {
+        localStorage.setItem('academic_os_courses', JSON.stringify(SEED_COURSES));
+        localStorage.setItem('academic_os_assignments', JSON.stringify(SEED_ASSIGNMENTS));
+        localStorage.setItem('academic_os_notes', JSON.stringify(SEED_NOTES));
+        localStorage.setItem('academic_os_tasks', JSON.stringify(SEED_TASKS));
+
+        setCourses(SEED_COURSES);
+        setAssignments(SEED_ASSIGNMENTS);
+        setNotes(SEED_NOTES);
+        setTasks(SEED_TASKS);
+      }
+    } catch (e) {
+      console.error('Gabim gjatë leximit të të dhënave nga localStorage:', e);
       setCourses(SEED_COURSES);
       setAssignments(SEED_ASSIGNMENTS);
       setNotes(SEED_NOTES);
@@ -360,8 +374,9 @@ export default function App() {
       {/* Main Content Dashboard Layout */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 md:px-8 py-8 space-y-8">
         {/* 2. Top-level Bento Grid Widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <ClockWidget />
+          <CountdownWidget isUniversityMode={isUniversityMode} />
           <PomodoroTimer />
           <ProfileCard onAcademicLevelChange={setAcademicLevel} />
         </div>
