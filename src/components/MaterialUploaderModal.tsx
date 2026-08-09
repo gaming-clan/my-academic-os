@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { Upload, FileText, Check, X, BookOpen, FileUp, Sparkles, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import { Upload, FileText, Check, X, BookOpen, FileUp, Sparkles, AlertCircle, Cpu, FileCode } from 'lucide-react';
 import { Course, Note } from '../types';
+import { convertToMarkItDown, MarkItDownResult } from '../utils/markitdownConverter';
 
 interface MaterialUploaderModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ interface ProcessedFile {
   folder: string;
   status: 'processing' | 'ready' | 'error';
   errorMessage?: string;
+  markItDownInfo?: MarkItDownResult['metadata'];
 }
 
 export default function MaterialUploaderModal({
@@ -51,7 +53,6 @@ export default function MaterialUploaderModal({
     const fileId = `file-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const cleanTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
 
-    // Add placeholder item
     const initialItem: ProcessedFile = {
       id: fileId,
       file,
@@ -66,27 +67,19 @@ export default function MaterialUploaderModal({
     setActiveFileId(fileId);
 
     try {
-      let extractedText = '';
-      const extension = file.name.split('.').pop()?.toLowerCase() || '';
-
-      if (['txt', 'md', 'markdown', 'json', 'csv', 'log', 'html', 'htm'].includes(extension)) {
-        extractedText = await readAsText(file);
-      } else if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(extension)) {
-        const dataUrl = await readAsDataUrl(file);
-        extractedText = `> 🖼️ **Imazh i Materialit Mësimor / Shënimeve**\n> - **Skedari:** \`${file.name}\`\n\n![${cleanTitle}](${dataUrl})\n\n## Përmbledhje & Shënime mbi Imazhin\n- *Shtoni përmbledhjen apo shënimet tuaja për këtë imazh këtu...*`;
-      } else if (extension === 'pdf') {
-        extractedText = await readPdfText(file);
-      } else {
-        // Fallback for docx/doc or other file types
-        extractedText = await readAsTextFallback(file);
-      }
-
-      const formattedContent = formatToMarkdown(file.name, extractedText, extension);
+      // Execute Microsoft MarkItDown Conversion
+      const result = await convertToMarkItDown(file);
 
       setProcessedFiles((prev) =>
         prev.map((item) =>
           item.id === fileId
-            ? { ...item, content: formattedContent, status: 'ready' }
+            ? {
+                ...item,
+                title: result.title,
+                content: result.markdown,
+                status: 'ready',
+                markItDownInfo: result.metadata,
+              }
             : item
         )
       );
@@ -97,7 +90,7 @@ export default function MaterialUploaderModal({
             ? {
                 ...item,
                 status: 'error',
-                errorMessage: err?.message || 'Ndodhi një gabim gjatë leximit të skedarit.',
+                errorMessage: err?.message || 'Ndodhi një gabim gjatë konvertimit të skedarit me Microsoft MarkItDown.',
               }
             : item
         )
@@ -126,7 +119,7 @@ export default function MaterialUploaderModal({
     }
 
     onAddNote({
-      title: item.title || 'Material i Ngarkuar',
+      title: item.title || 'Material i Importuar (MarkItDown)',
       content: item.content,
       courseId: item.courseId,
       folder: item.folder || 'Libër Mësimor',
@@ -149,7 +142,7 @@ export default function MaterialUploaderModal({
 
     readyItems.forEach((item) => {
       onAddNote({
-        title: item.title || 'Material i Ngarkuar',
+        title: item.title || 'Material i Importuar (MarkItDown)',
         content: item.content,
         courseId: item.courseId || defaultCourseId,
         folder: item.folder || 'Libër Mësimor',
@@ -169,15 +162,15 @@ export default function MaterialUploaderModal({
         {/* Modal Header */}
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <FileUp className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <Cpu className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-bold text-base text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
-                Ngarko Materiale Mësimore <Sparkles className="w-4 h-4 text-amber-400" />
+                Ngarko Materiale Mësimore <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono border border-emerald-500/20">Microsoft MarkItDown</span>
               </h3>
               <p className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">
-                Importoni libra, shënime &amp; dokumente dhe kthejini automatikisht në shënime me formatim të duhur
+                Kthen automatikisht skedarët PDF, Word, PowerPoint, Excel/CSV, Imazhe &amp; HTML në Markdown të strukturuar
               </p>
             </div>
           </div>
@@ -210,7 +203,7 @@ export default function MaterialUploaderModal({
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".pdf,.txt,.md,.markdown,.doc,.docx,.png,.jpg,.jpeg,.webp,.json,.csv"
+              accept=".pdf,.txt,.md,.markdown,.doc,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.png,.jpg,.jpeg,.webp,.html,.htm,.json"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -219,7 +212,7 @@ export default function MaterialUploaderModal({
               Tërhiqni skedarët këtu ose klikoni për të shfletuar
             </h4>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-md mx-auto">
-              Mbështet skedarë teksti (<strong>.txt, .md</strong>), libra e dokumente (<strong>.pdf, .docx</strong>) dhe imazhe (<strong>.png, .jpg</strong>)
+              Konvertim me **Microsoft MarkItDown**: PDF (<strong>.pdf</strong>), Word (<strong>.docx</strong>), PowerPoint (<strong>.pptx</strong>), Excel/CSV (<strong>.xlsx, .csv</strong>), Imazhe (<strong>.png, .jpg</strong>), Tekst &amp; HTML.
             </p>
           </div>
 
@@ -229,7 +222,7 @@ export default function MaterialUploaderModal({
               {/* File list sidebar */}
               <div className="md:col-span-4 space-y-2 max-h-80 overflow-y-auto pr-1">
                 <div className="flex items-center justify-between text-xs font-semibold text-zinc-400 font-mono mb-2">
-                  <span>Skedarët e Zgjedhur ({processedFiles.length})</span>
+                  <span>Skedarët e Konvertuar ({processedFiles.length})</span>
                 </div>
                 {processedFiles.map((item) => (
                   <div
@@ -242,11 +235,11 @@ export default function MaterialUploaderModal({
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <FileText className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                      <FileCode className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                       <span className="truncate">{item.title}</span>
                     </div>
                     {item.status === 'processing' ? (
-                      <span className="text-[10px] text-amber-500 font-mono animate-pulse">Duke u përpunuar...</span>
+                      <span className="text-[10px] text-amber-500 font-mono animate-pulse">MarkItDown...</span>
                     ) : item.status === 'error' ? (
                       <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
                     ) : (
@@ -260,6 +253,18 @@ export default function MaterialUploaderModal({
               <div className="md:col-span-8 bg-zinc-50/50 dark:bg-zinc-900/30 rounded-xl p-4 border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
                 {activeItem ? (
                   <>
+                    {/* MarkItDown Engine Meta Badge */}
+                    {activeItem.markItDownInfo && (
+                      <div className="flex flex-wrap items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2.5 text-[11px] font-mono text-emerald-700 dark:text-emerald-300">
+                        <Cpu className="w-3.5 h-3.5" />
+                        <span>Engine: <strong>{activeItem.markItDownInfo.engine}</strong></span>
+                        <span>• Skedari: <strong>{activeItem.markItDownInfo.fileSize}</strong></span>
+                        {activeItem.markItDownInfo.pageOrSlideCount && (
+                          <span>• Faqe/Sllajde: <strong>{activeItem.markItDownInfo.pageOrSlideCount}</strong></span>
+                        )}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
@@ -322,7 +327,7 @@ export default function MaterialUploaderModal({
 
                     <div>
                       <label className="text-[10px] font-mono uppercase text-zinc-400 block mb-1">
-                        Teksti i Nxjerrë &amp; Formatuar në Markdown
+                        Përmbajtja e Konvertuar në Microsoft MarkItDown
                       </label>
                       <textarea
                         value={activeItem.content}
@@ -331,7 +336,7 @@ export default function MaterialUploaderModal({
                             prev.map((f) => (f.id === activeItem.id ? { ...f, content: e.target.value } : f))
                           )
                         }
-                        rows={8}
+                        rows={10}
                         className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs font-mono text-zinc-800 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 resize-none"
                       />
                     </div>
@@ -340,7 +345,7 @@ export default function MaterialUploaderModal({
                       <button
                         onClick={() => handleImportSingle(activeItem)}
                         disabled={activeItem.status !== 'ready'}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" /> Krijo Shënimin për Këtë Material
                       </button>
@@ -366,14 +371,14 @@ export default function MaterialUploaderModal({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all"
+              className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer"
             >
               Anulo
             </button>
             {processedFiles.length > 0 && (
               <button
                 onClick={handleImportAll}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-amber-300" /> Importo të Gjitha në Shënime
               </button>
@@ -383,111 +388,4 @@ export default function MaterialUploaderModal({
       </div>
     </div>
   );
-}
-
-// Helpers for file reading
-async function readAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsText(file);
-  });
-}
-
-async function readAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function readPdfText(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const buffer = reader.result as ArrayBuffer;
-        const bytes = new Uint8Array(buffer);
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        const decoded = decoder.decode(bytes);
-
-        const textMatches: string[] = [];
-        const tjRegex = /\(([^)]+)\)\s*T[jJ]/g;
-        let match;
-        while ((match = tjRegex.exec(decoded)) !== null) {
-          if (match[1] && match[1].trim().length > 0) {
-            textMatches.push(match[1]);
-          }
-        }
-
-        if (textMatches.length > 5) {
-          resolve(textMatches.join(' '));
-          return;
-        }
-
-        // Fallback: extract continuous printable lines
-        const cleanLines = decoded
-          .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
-          .split(/[\r\n]+/)
-          .map((line) => line.trim())
-          .filter(
-            (line) =>
-              line.length > 3 &&
-              !line.startsWith('%PDF') &&
-              !line.includes('endobj') &&
-              !line.includes('stream') &&
-              !line.includes('xref')
-          );
-
-        resolve(cleanLines.length > 0 ? cleanLines.join('\n') : `[U analizua struktura e PDF-së: ${file.name}]`);
-      } catch (e) {
-        resolve(`[Përmbajtja e skedarit PDF: ${file.name}]`);
-      }
-    };
-    reader.onerror = () => resolve(`[Nuk u mundësua leximi automatik i PDF-së: ${file.name}]`);
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-async function readAsTextFallback(file: File): Promise<string> {
-  try {
-    const text = await readAsText(file);
-    // Remove null bytes / binary non-printable junk
-    return text.replace(/[\x00-\x09\x0B\x0C\x0E-\x1F]/g, ' ');
-  } catch (e) {
-    return `[Nuk u mundësua nxjerrja e plotë e tekstit për skedarin ${file.name}]`;
-  }
-}
-
-function formatToMarkdown(filename: string, rawContent: string, extension: string): string {
-  const cleanTitle = filename.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-  const dateStr = new Date().toLocaleDateString('sq-AL');
-
-  if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(extension)) {
-    return rawContent; // Already formatted with img tag
-  }
-
-  const lines = rawContent.split('\n');
-  const formattedLines = lines.map((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return '';
-
-    if (/^(KAPITULLI|LEKSIONI|KAPITULL|CHAPTER|SECTION|LEKSION|MODULI)\s+\d+/i.test(trimmed)) {
-      return `\n## ${trimmed}\n`;
-    }
-    if (/^\d+\.\s+[A-ZÇË]/.test(trimmed)) {
-      return `\n### ${trimmed}\n`;
-    }
-    if (/^[•\-*]\s+/.test(trimmed)) {
-      return trimmed;
-    }
-    return trimmed;
-  });
-
-  const bodyMarkdown = formattedLines.join('\n').replace(/\n{3,}/g, '\n\n');
-
-  return `# ${cleanTitle}\n\n> 📚 **Material Mësimor i Importuar**\n> - **Skedari Origjinal:** \`${filename}\`\n> - **Data e Importimit:** ${dateStr}\n\n---\n\n${bodyMarkdown || '*Skedari u importua me sukses. Ju lutem plotësoni shënimet tuaja.*'}`;
 }

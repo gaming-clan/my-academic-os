@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Timer, Sparkles, GraduationCap, School } from 'lucide-react';
+import { Calendar, Timer, Sparkles, GraduationCap, School, Maximize2 } from 'lucide-react';
 
 interface CountdownWidgetProps {
   isUniversityMode?: boolean;
+  onOpenFullscreen?: () => void;
 }
 
-export default function CountdownWidget({ isUniversityMode = true }: CountdownWidgetProps) {
+export default function CountdownWidget({
+  isUniversityMode = true,
+  onOpenFullscreen,
+}: CountdownWidgetProps) {
   // Target dates:
   // Fillimi i vitit shkollor: 14 Shtator 2026
   // Fillimi i vitit akademik: 5 Tetor 2026
@@ -52,14 +56,25 @@ export default function CountdownWidget({ isUniversityMode = true }: CountdownWi
   return (
     <div
       id="countdown-widget"
-      className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex flex-col justify-between h-44 transition-all"
+      className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-2xl p-6 border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm flex flex-col justify-between h-44 transition-all relative group"
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-mono flex items-center gap-1.5">
           {isUniversityMode ? <GraduationCap className="w-3.5 h-3.5 text-blue-500" /> : <School className="w-3.5 h-3.5 text-amber-500" />}
           {targetTitle}
         </span>
-        <Timer className="w-4 h-4 text-emerald-500" />
+        <div className="flex items-center gap-1.5">
+          {onOpenFullscreen && (
+            <button
+              onClick={onOpenFullscreen}
+              className="p-1 rounded-lg text-zinc-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-all cursor-pointer"
+              title="Zgjero në Ekran të Plotë (Fullscreen Timer)"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <Timer className="w-4 h-4 text-emerald-500" />
+        </div>
       </div>
 
       <div className="my-auto">
@@ -94,7 +109,12 @@ export default function CountdownWidget({ isUniversityMode = true }: CountdownWi
         <span className="flex items-center gap-1">
           <Calendar className="w-3 h-3" /> Data: {targetFormatted}
         </span>
-        <span className="capitalize">{isUniversityMode ? 'Universitet' : 'Gjimnaz'}</span>
+        <button
+          onClick={onOpenFullscreen}
+          className="capitalize hover:text-emerald-500 font-semibold cursor-pointer underline flex items-center gap-1"
+        >
+          {isUniversityMode ? 'Universitet' : 'Gjimnaz'} (Ekran i Plotë)
+        </button>
       </div>
     </div>
   );

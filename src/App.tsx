@@ -17,6 +17,8 @@ import {
   Moon,
   Monitor,
   Download,
+  Timer,
+  Upload,
 } from 'lucide-react';
 
 import { Course, Assignment, Note, Task, Profile } from './types';
@@ -25,7 +27,7 @@ import { useFullscreen } from './hooks/useFullscreen';
 import { useTheme } from './hooks/useTheme';
 import { usePWAInstall } from './hooks/usePWAInstall';
 
-// Import our modular widgets and components
+// Import modular widgets and components
 import ClockWidget from './components/ClockWidget';
 import CountdownWidget from './components/CountdownWidget';
 import PomodoroTimer from './components/PomodoroTimer';
@@ -34,6 +36,8 @@ import CourseCard, { CourseModal } from './components/CourseCard';
 import TaskTracker from './components/TaskTracker';
 import AssignmentTracker from './components/AssignmentTracker';
 import NoteEditor from './components/NoteEditor';
+import FullscreenCountdownScreen from './components/FullscreenCountdownScreen';
+import MaterialUploaderModal from './components/MaterialUploaderModal';
 
 // Të Dhëna Shembull për Poliruar Estetikën e Menjëhershme
 const SEED_COURSES: Course[] = [
@@ -138,6 +142,12 @@ export default function App() {
   // Tracks the student's academic level (reported by ProfileCard) to gate university-only features like ECTS credits
   const [academicLevel, setAcademicLevel] = useState<Profile['academicLevel']>('Universitet');
   const isUniversityMode = academicLevel === 'Universitet';
+
+  // Fullscreen Countdown Screen Landing view (active when opening app)
+  const [isFullscreenCountdownOpen, setIsFullscreenCountdownOpen] = useState(true);
+
+  // Material Uploader Modal
+  const [isMaterialUploaderOpen, setIsMaterialUploaderOpen] = useState(false);
 
   // Modals and creating states
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -318,6 +328,23 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 flex flex-col">
+      {/* Fullscreen Countdown Landing View */}
+      <FullscreenCountdownScreen
+        isOpen={isFullscreenCountdownOpen}
+        onClose={() => setIsFullscreenCountdownOpen(false)}
+        isUniversityMode={isUniversityMode}
+        onAcademicLevelChange={setAcademicLevel}
+      />
+
+      {/* Material Uploader Modal (Microsoft MarkItDown) */}
+      <MaterialUploaderModal
+        isOpen={isMaterialUploaderOpen}
+        onClose={() => setIsMaterialUploaderOpen(false)}
+        courses={courses}
+        selectedCourseId={selectedCourseId}
+        onAddNote={handleAddNote}
+      />
+
       {/* 1. Header Banner Cover Area */}
       <div className="relative h-64 w-full overflow-hidden flex items-end">
         <img
@@ -327,8 +354,26 @@ export default function App() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
 
-        {/* Top-right App Controls: install, theme, fullscreen */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+        {/* Top-right App Controls: install, theme, fullscreen countdown, markitdown */}
+        <div className="absolute top-4 right-4 z-10 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsFullscreenCountdownOpen(true)}
+            className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md hover:bg-black/60 text-white font-semibold px-3 py-2 rounded-xl border border-white/10 text-xs transition-all cursor-pointer shadow-lg"
+            title="Shfaq Numërimin Mbrapsht me Ekran të Plotë"
+          >
+            <Timer className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Numërimi Fullscreen</span>
+          </button>
+
+          <button
+            onClick={() => setIsMaterialUploaderOpen(true)}
+            className="flex items-center gap-1.5 bg-emerald-600/90 backdrop-blur-md hover:bg-emerald-600 text-white font-semibold px-3 py-2 rounded-xl border border-emerald-400/30 text-xs transition-all cursor-pointer shadow-lg"
+            title="Ngarko Materiale & Ktheji në Markdown (Microsoft MarkItDown)"
+          >
+            <Upload className="w-3.5 h-3.5 text-amber-300" />
+            <span className="hidden sm:inline">Ngarko Materiale (MarkItDown)</span>
+          </button>
+
           {isInstallable && (
             <button
               onClick={promptInstall}
@@ -339,16 +384,18 @@ export default function App() {
               Instalo
             </button>
           )}
+
           <button
             onClick={cycleTheme}
-            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg"
+            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg cursor-pointer"
             title={themeTitle}
           >
             {theme === 'light' ? <Sun className="w-4 h-4" /> : theme === 'dark' ? <Moon className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
           </button>
+
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg"
+            className="p-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg cursor-pointer"
             title={isFullscreen ? 'Dil nga Ekrani i Plotë' : 'Ekrani i Plotë'}
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
@@ -376,7 +423,10 @@ export default function App() {
         {/* 2. Top-level Bento Grid Widgets */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <ClockWidget />
-          <CountdownWidget isUniversityMode={isUniversityMode} />
+          <CountdownWidget
+            isUniversityMode={isUniversityMode}
+            onOpenFullscreen={() => setIsFullscreenCountdownOpen(true)}
+          />
           <PomodoroTimer />
           <ProfileCard onAcademicLevelChange={setAcademicLevel} />
         </div>
@@ -392,15 +442,23 @@ export default function App() {
                 Klikoni një lëndë për të filtruar shënimet, detyrat dhe vlerësimet më poshtë
               </p>
             </div>
-            <button
-              onClick={() => {
-                setEditingCourse(null);
-                setIsCourseModalOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition-all"
-            >
-              <Plus className="w-3.5 h-3.5" /> Shto Lëndë
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsMaterialUploaderOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold text-xs border border-amber-500/20 transition-all cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" /> Ngarko Materiale (MarkItDown)
+              </button>
+              <button
+                onClick={() => {
+                  setEditingCourse(null);
+                  setIsCourseModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition-all cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Shto Lëndë
+              </button>
+            </div>
           </div>
 
           {courses.length === 0 ? (
@@ -438,7 +496,7 @@ export default function App() {
             <div className="flex gap-1.5 bg-zinc-200/50 dark:bg-zinc-900 p-0.5 rounded-xl text-xs font-semibold">
               <button
                 onClick={() => setActiveTab('detyra')}
-                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
                   activeTab === 'detyra'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
@@ -448,7 +506,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setActiveTab('vleresime')}
-                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
                   activeTab === 'vleresime'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
@@ -458,7 +516,7 @@ export default function App() {
               </button>
               <button
                 onClick={() => setActiveTab('shenime')}
-                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
                   activeTab === 'shenime'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
@@ -475,7 +533,7 @@ export default function App() {
                 <span>Filtruar sipas Lëndës</span>
                 <button
                   onClick={() => setSelectedCourseId(null)}
-                  className="p-0.5 rounded-full hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 transition-colors"
+                  className="p-0.5 rounded-full hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 transition-colors cursor-pointer"
                   title="Hiq Filtrin"
                 >
                   <X className="w-3.5 h-3.5" />
