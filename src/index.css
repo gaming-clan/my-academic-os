@@ -5,3 +5,209 @@
 /* Dark mode is toggled explicitly (light/dark/system) via a `dark` class on <html>,
    instead of Tailwind's default prefers-color-scheme media query. */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Visual themes remap the Tailwind palette tokens used throughout the app.
+   Components keep their semantic utility classes while the selected theme
+   changes the shared color language in one place. */
+html[data-theme='ocean'] {
+  --color-zinc-50: #f1f7fb;
+  --color-zinc-100: #e2eef6;
+  --color-zinc-200: #c9deed;
+  --color-zinc-300: #9fc3da;
+  --color-zinc-400: #6e9fbe;
+  --color-zinc-500: #4d7897;
+  --color-zinc-600: #365a78;
+  --color-zinc-700: #29465f;
+  --color-zinc-800: #1e3448;
+  --color-zinc-900: #142536;
+  --color-zinc-950: #0c1826;
+  --color-emerald-50: #e9fbff;
+  --color-emerald-100: #cef5fb;
+  --color-emerald-200: #a4e7f2;
+  --color-emerald-300: #6cd5e4;
+  --color-emerald-400: #2fc2d4;
+  --color-emerald-500: #13a7bd;
+  --color-emerald-600: #0d849a;
+  --color-emerald-700: #0a687e;
+  --color-emerald-800: #0c5266;
+  --color-emerald-950: #073448;
+  --color-blue-100: #dff5ff;
+  --color-blue-400: #38bdf8;
+  --color-blue-500: #0ea5e9;
+  --color-blue-600: #0284c7;
+  --color-blue-950: #082f49;
+}
+
+html[data-theme='lavender'] {
+  --color-zinc-50: #faf8ff;
+  --color-zinc-100: #f1edfb;
+  --color-zinc-200: #e5ddf3;
+  --color-zinc-300: #c9bde0;
+  --color-zinc-400: #9d8ebd;
+  --color-zinc-500: #71618f;
+  --color-zinc-600: #55476f;
+  --color-zinc-700: #403554;
+  --color-zinc-800: #30283f;
+  --color-zinc-900: #211b2e;
+  --color-zinc-950: #14111e;
+  --color-emerald-50: #f5efff;
+  --color-emerald-100: #eadcff;
+  --color-emerald-200: #d7bfff;
+  --color-emerald-300: #c084fc;
+  --color-emerald-400: #a855f7;
+  --color-emerald-500: #8b5cf6;
+  --color-emerald-600: #7c3aed;
+  --color-emerald-700: #6d28d9;
+  --color-emerald-800: #5b21b6;
+  --color-emerald-950: #3b0764;
+  --color-blue-100: #e0e7ff;
+  --color-blue-400: #818cf8;
+  --color-blue-500: #6366f1;
+  --color-blue-600: #4f46e5;
+  --color-blue-950: #1e1b4b;
+}
+
+html[data-theme='sunset'] {
+  --color-zinc-50: #fffaf5;
+  --color-zinc-100: #fceddf;
+  --color-zinc-200: #f6d7c2;
+  --color-zinc-300: #e9b99a;
+  --color-zinc-400: #bd896d;
+  --color-zinc-500: #96634f;
+  --color-zinc-600: #754a3c;
+  --color-zinc-700: #5c382f;
+  --color-zinc-800: #442a25;
+  --color-zinc-900: #2e1c1b;
+  --color-zinc-950: #1d1113;
+  --color-emerald-50: #fff1e7;
+  --color-emerald-100: #ffe0ca;
+  --color-emerald-200: #ffc19b;
+  --color-emerald-300: #fd9a61;
+  --color-emerald-400: #fb7a3c;
+  --color-emerald-500: #f97316;
+  --color-emerald-600: #ea580c;
+  --color-emerald-700: #c2410c;
+  --color-emerald-800: #9a3412;
+  --color-emerald-950: #431407;
+  --color-blue-100: #ffe4e6;
+  --color-blue-400: #fb7185;
+  --color-blue-500: #f43f5e;
+  --color-blue-600: #e11d48;
+  --color-blue-950: #4c0519;
+}
+
+html[data-theme='midnight'] {
+  --color-zinc-50: #f1f5ff;
+  --color-zinc-100: #dfe7fb;
+  --color-zinc-200: #c3d0ed;
+  --color-zinc-300: #93a7d1;
+  --color-zinc-400: #667eae;
+  --color-zinc-500: #4a6090;
+  --color-zinc-600: #354a76;
+  --color-zinc-700: #29395f;
+  --color-zinc-800: #202d4b;
+  --color-zinc-900: #17213a;
+  --color-zinc-950: #0b1020;
+  --color-emerald-50: #e6fbff;
+  --color-emerald-100: #c9f5fb;
+  --color-emerald-200: #9cecf5;
+  --color-emerald-300: #67e8f9;
+  --color-emerald-400: #22d3ee;
+  --color-emerald-500: #06b6d4;
+  --color-emerald-600: #0891b2;
+  --color-emerald-700: #0e7490;
+  --color-emerald-800: #155e75;
+  --color-emerald-950: #083344;
+  --color-blue-100: #e0e7ff;
+  --color-blue-400: #a5b4fc;
+  --color-blue-500: #818cf8;
+  --color-blue-600: #6366f1;
+  --color-blue-950: #1e1b4b;
+}
+
+html[data-theme='paper'] {
+  --color-zinc-50: #fffcf7;
+  --color-zinc-100: #f7f0e4;
+  --color-zinc-200: #eadfce;
+  --color-zinc-300: #d8c7ae;
+  --color-zinc-400: #a89273;
+  --color-zinc-500: #7b6a52;
+  --color-zinc-600: #5c4d3b;
+  --color-zinc-700: #483b2f;
+  --color-zinc-800: #362c25;
+  --color-zinc-900: #261e1a;
+  --color-zinc-950: #17120f;
+  --color-emerald-50: #fff8e8;
+  --color-emerald-100: #ffefc2;
+  --color-emerald-200: #f8d98b;
+  --color-emerald-300: #ecc36a;
+  --color-emerald-400: #d9a441;
+  --color-emerald-500: #c5852c;
+  --color-emerald-600: #a5671e;
+  --color-emerald-700: #834f19;
+  --color-emerald-800: #693d17;
+  --color-emerald-950: #3e230e;
+  --color-blue-100: #e7f0fa;
+  --color-blue-400: #78a9d7;
+  --color-blue-500: #4f86bf;
+  --color-blue-600: #356da5;
+  --color-blue-950: #1e3a5f;
+}
+
+html[data-theme='mint'] {
+  --color-zinc-50: #f4fffb;
+  --color-zinc-100: #e1f7ef;
+  --color-zinc-200: #c6ebdb;
+  --color-zinc-300: #98d6bd;
+  --color-zinc-400: #63ae94;
+  --color-zinc-500: #438b72;
+  --color-zinc-600: #2f6b58;
+  --color-zinc-700: #245344;
+  --color-zinc-800: #1b3e34;
+  --color-zinc-900: #142c26;
+  --color-zinc-950: #0b1d18;
+  --color-emerald-50: #ebfff6;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-emerald-700: #047857;
+  --color-emerald-800: #065f46;
+  --color-emerald-950: #022c22;
+  --color-blue-100: #e0f2fe;
+  --color-blue-400: #38bdf8;
+  --color-blue-500: #0ea5e9;
+  --color-blue-600: #0284c7;
+  --color-blue-950: #082f49;
+}
+
+html[data-theme='rose'] {
+  --color-zinc-50: #fff7fb;
+  --color-zinc-100: #fcecf4;
+  --color-zinc-200: #f6d7e5;
+  --color-zinc-300: #ebb4c9;
+  --color-zinc-400: #bf7d9c;
+  --color-zinc-500: #9b5879;
+  --color-zinc-600: #7d3f61;
+  --color-zinc-700: #64304d;
+  --color-zinc-800: #4c263d;
+  --color-zinc-900: #321a29;
+  --color-zinc-950: #1f1019;
+  --color-emerald-50: #fff1f5;
+  --color-emerald-100: #ffe0e9;
+  --color-emerald-200: #ffc3d3;
+  --color-emerald-300: #ff9db7;
+  --color-emerald-400: #fb7185;
+  --color-emerald-500: #f43f5e;
+  --color-emerald-600: #e11d48;
+  --color-emerald-700: #be123c;
+  --color-emerald-800: #9f1239;
+  --color-emerald-950: #4c0519;
+  --color-blue-100: #fce7f3;
+  --color-blue-400: #f472b6;
+  --color-blue-500: #ec4899;
+  --color-blue-600: #db2777;
+  --color-blue-950: #500724;
+}

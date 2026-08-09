@@ -4,7 +4,7 @@
 
 ### Hapësira jote akademike, 100% lokale, e ndërtuar posaçërisht për sistemin arsimor shqiptar.
 
-🇦🇱 Lokalizuar plotësisht &nbsp;•&nbsp; 🔒 100% Lokal &nbsp;•&nbsp; 📱 PWA e Instalueshme &nbsp;•&nbsp; 🌗 Temë E Çelët/E Errët &nbsp;•&nbsp; 🆓 Falas & Open Source
+🇦🇱 Lokalizuar plotësisht &nbsp;•&nbsp; 🔒 100% Lokal &nbsp;•&nbsp; 📱 PWA e Instalueshme &nbsp;•&nbsp; 🎨 Tema të personalizueshme &nbsp;•&nbsp; 🆓 Falas & Open Source
 
 </div>
 
@@ -59,8 +59,15 @@ Sesione studimi/pushimi në stilin Pomodoro, me kohëzgjatje të rregullueshme.
 ### 🕐 Ora e Tiranës
 Ora dhe data aktuale, gjithmonë sipas orës zyrtare të Tiranës — pavarësisht ku ndodhesh.
 
-### 🌗 Temë: E Çelët / E Errët / Sistemi
-Ndrysho temën me një klikim, ose lëre të ndjekë automatikisht preferencën e sistemit tënd.
+### 🎨 Sistemi i Temave
+Zgjidh pamjen nga picker-i i temave në header. Temat ndahen qartë sipas mënyrës së paraqitjes:
+
+- **Tema klasike:** `Light`, `Dark` dhe `System`.
+- **Variacione Light:** `Light · Krem`, `Light · Mint` dhe `Light · Rozë` — aktivizojnë gjithmonë modalitetin light.
+- **Variacione Dark:** `Oqean`, `Lavandë`, `Perëndim` dhe `Mesnatë` — aktivizojnë gjithmonë modalitetin dark.
+- **Tema automatike:** `Sipas orës` — përdor Krem në mëngjes, Oqean gjatë ditës, Perëndim në mbrëmje dhe Mesnatë gjatë natës.
+
+Zgjedhja ruhet lokalisht në shfletues përmes `localStorage`, pa dërguar preferencat në server.
 
 ### 📱 Aplikacion i Instalueshëm (PWA)
 Mund të instalohet si aplikacion i vërtetë desktop ose mobile, dhe funksionon edhe pa internet (falë një *service worker*-i që ruan aplikacionin lokalisht).
