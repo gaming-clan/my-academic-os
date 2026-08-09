@@ -19,12 +19,14 @@ import {
   Download,
   Timer,
   Upload,
+  Palette,
+  Check,
 } from 'lucide-react';
 
 import { Course, Assignment, Note, Task, Profile } from './types';
 import coverImage from './assets/images/academic_os_cover_1783785015939.jpg';
 import { useFullscreen } from './hooks/useFullscreen';
-import { useTheme } from './hooks/useTheme';
+import { useTheme, VISUAL_THEMES, type ThemePreference } from './hooks/useTheme';
 import { usePWAInstall } from './hooks/usePWAInstall';
 
 // Import modular widgets and components
@@ -128,6 +130,12 @@ const SEED_NOTES: Note[] = [
 
 type ActiveTab = 'detyra' | 'vleresime' | 'shenime';
 
+const CLASSIC_THEME_OPTIONS: Array<{ id: ThemePreference; label: string; description: string; swatches: [string, string] }> = [
+  { id: 'light', label: 'Light', description: 'Tema klasike e çelët', swatches: ['#ffffff', '#d1fae5'] },
+  { id: 'dark', label: 'Dark', description: 'Tema klasike e errët', swatches: ['#18181b', '#10b981'] },
+  { id: 'system', label: 'System', description: 'Ndjek preferencën e pajisjes', swatches: ['#a1a1aa', '#27272a'] },
+];
+
 export default function App() {
   // Core database collections (persisted only in this browser's localStorage)
   const [courses, setCourses] = useState<Course[]>([]);
@@ -155,8 +163,9 @@ export default function App() {
 
   // App-wide fullscreen toggle, theme, and installability (desktop/mobile "app" affordances)
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
-  const { theme, cycleTheme } = useTheme();
+  const { theme, setTheme, cycleTheme, visualTheme, setVisualTheme } = useTheme();
   const { isInstallable, promptInstall } = usePWAInstall();
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
 
   // Load data from LocalStorage (seed it on first run)
   useEffect(() => {
@@ -323,8 +332,46 @@ export default function App() {
     localStorage.setItem('academic_os_notes', JSON.stringify(updated));
   };
 
+  const selectedVisualTheme = VISUAL_THEMES.find((option) => option.id === visualTheme);
   const themeTitle =
-    theme === 'light' ? 'Tema: E Çelët (kliko për të errët)' : theme === 'dark' ? 'Tema: E Errët (kliko për sistemin)' : 'Tema: Sipas Sistemit (kliko për të çelët)';
+    selectedVisualTheme?.mode === 'dark'
+      ? 'Variant dark (kliko për temat klasike)'
+      : selectedVisualTheme?.mode === 'light'
+        ? 'Variant light (kliko për temat klasike)'
+        : visualTheme === 'time'
+          ? 'Tema: Sipas orës (kliko për ta kthyer manuale)'
+          : theme === 'light'
+            ? 'Tema: E Çelët (kliko për të errët)'
+            : theme === 'dark'
+              ? 'Tema: E Errët (kliko për sistemin)'
+              : 'Tema: Sipas Sistemit (kliko për të çelët)';
+
+  const renderVisualThemeOption = (option: (typeof VISUAL_THEMES)[number]) => (
+    <button
+      key={option.id}
+      role="menuitemradio"
+      aria-checked={visualTheme === option.id}
+      onClick={() => {
+        setVisualTheme(option.id);
+        setIsThemePickerOpen(false);
+      }}
+      className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
+        visualTheme === option.id
+          ? 'bg-zinc-100 dark:bg-zinc-900'
+          : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/70'
+      }`}
+    >
+      <span
+        className="h-8 w-8 shrink-0 rounded-xl shadow-inner ring-1 ring-black/10"
+        style={{ background: `linear-gradient(135deg, ${option.swatches[0]}, ${option.swatches[1]})` }}
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs font-semibold text-zinc-800 dark:text-zinc-100">{option.label}</span>
+        <span className="block truncate text-[10px] text-zinc-400 dark:text-zinc-500">{option.description}</span>
+      </span>
+      {visualTheme === option.id && <Check className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />}
+    </button>
+  );
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 flex flex-col">
@@ -346,7 +393,7 @@ export default function App() {
       />
 
       {/* 1. Header Banner Cover Area */}
-      <div className="relative h-64 w-full overflow-hidden flex items-end">
+      <div className="relative h-64 w-full overflow-visible flex items-end">
         <img
           src={coverImage}
           alt="Kopertinë Estetike Malore"
@@ -384,6 +431,69 @@ export default function App() {
               Instalo
             </button>
           )}
+
+          <div className="relative">
+            <button
+              onClick={() => setIsThemePickerOpen((open) => !open)}
+              className="flex items-center gap-1.5 p-2 sm:px-3 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-black/60 transition-all shadow-lg cursor-pointer"
+              title="Zgjidh stilin vizual"
+              aria-label="Zgjidh stilin vizual"
+              aria-haspopup="menu"
+              aria-expanded={isThemePickerOpen}
+            >
+              <Palette className="w-4 h-4" />
+              <span className="hidden lg:inline text-xs font-semibold">
+                {VISUAL_THEMES.find((option) => option.id === visualTheme)?.label}
+              </span>
+            </button>
+
+            {isThemePickerOpen && (
+              <div
+                role="menu"
+                aria-label="Temat vizuale"
+                className="fixed right-3 top-16 z-[100] w-60 max-w-[calc(100vw-1rem)] max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white/95 dark:bg-zinc-950/95 p-2 shadow-2xl backdrop-blur-xl"
+              >
+                <div className="px-2.5 pb-2 pt-1">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Stili vizual</p>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Zgjidhni atmosferën e hapësirës suaj.</p>
+                </div>
+                <p className="px-2.5 pb-1 pt-2 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Tema klasike</p>
+                {CLASSIC_THEME_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    role="menuitemradio"
+                    aria-checked={visualTheme === 'academic' && theme === option.id}
+                    onClick={() => {
+                      setVisualTheme('academic');
+                      setTheme(option.id);
+                      setIsThemePickerOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
+                      visualTheme === 'academic' && theme === option.id
+                        ? 'bg-zinc-100 dark:bg-zinc-900'
+                        : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/70'
+                    }`}
+                  >
+                    <span
+                      className="h-8 w-8 shrink-0 rounded-xl shadow-inner ring-1 ring-black/10"
+                      style={{ background: `linear-gradient(135deg, ${option.swatches[0]}, ${option.swatches[1]})` }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-semibold text-zinc-800 dark:text-zinc-100">{option.label}</span>
+                      <span className="block truncate text-[10px] text-zinc-400 dark:text-zinc-500">{option.description}</span>
+                    </span>
+                    {visualTheme === 'academic' && theme === option.id && <Check className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />}
+                  </button>
+                ))}
+                <p className="px-2.5 pb-1 pt-3 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Variacione light</p>
+                {VISUAL_THEMES.filter((option) => option.mode === 'light').map(renderVisualThemeOption)}
+                <p className="px-2.5 pb-1 pt-3 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Variacione dark</p>
+                {VISUAL_THEMES.filter((option) => option.mode === 'dark').map(renderVisualThemeOption)}
+                <p className="px-2.5 pb-1 pt-3 text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">Automatike</p>
+                {VISUAL_THEMES.filter((option) => option.mode === 'auto').map(renderVisualThemeOption)}
+              </div>
+            )}
+          </div>
 
           <button
             onClick={cycleTheme}

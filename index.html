@@ -21,8 +21,22 @@
       (function () {
         try {
           var theme = localStorage.getItem('academic_os_theme') || 'system';
+          var selectedVisualTheme = localStorage.getItem('academic_os_visual_theme');
+          var visualTheme = selectedVisualTheme;
           var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var hour = new Date().getHours();
+          if (selectedVisualTheme === 'time') {
+            visualTheme = hour < 6 || hour >= 21 ? 'midnight' : hour < 11 ? 'paper' : hour < 17 ? 'ocean' : 'sunset';
+            isDark = visualTheme === 'midnight';
+          } else if (['paper', 'mint', 'rose'].indexOf(visualTheme) !== -1) {
+            isDark = false;
+          } else if (['ocean', 'lavender', 'sunset', 'midnight'].indexOf(visualTheme) !== -1) {
+            isDark = true;
+          }
           if (isDark) document.documentElement.classList.add('dark');
+          if (['academic', 'ocean', 'lavender', 'sunset', 'midnight', 'paper', 'mint', 'rose'].indexOf(visualTheme) !== -1) {
+            document.documentElement.dataset.theme = visualTheme;
+          }
           document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
         } catch (e) {}
       })();
