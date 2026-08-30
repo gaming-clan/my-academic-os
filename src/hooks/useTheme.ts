@@ -143,6 +143,13 @@ export function useTheme() {
     setThemeState(next);
   }, []);
 
+  const setClassicTheme = useCallback((next: ThemePreference) => {
+    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem(VISUAL_THEME_STORAGE_KEY, 'academic');
+    setThemeState(next);
+    setVisualThemeState('academic');
+  }, []);
+
   const cycleTheme = useCallback(() => {
     if (visualTheme === 'time') {
       localStorage.setItem(VISUAL_THEME_STORAGE_KEY, 'academic');
@@ -175,5 +182,5 @@ export function useTheme() {
     setVisualThemeState(next);
   }, []);
 
-  return { theme, setTheme, cycleTheme, visualTheme, setVisualTheme };
+  return { theme, setTheme, setClassicTheme, cycleTheme, visualTheme, setVisualTheme };
 }

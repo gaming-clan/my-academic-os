@@ -163,7 +163,7 @@ export default function App() {
 
   // App-wide fullscreen toggle, theme, and installability (desktop/mobile "app" affordances)
   const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
-  const { theme, setTheme, cycleTheme, visualTheme, setVisualTheme } = useTheme();
+  const { theme, setClassicTheme, cycleTheme, visualTheme, setVisualTheme } = useTheme();
   const { isInstallable, promptInstall } = usePWAInstall();
   const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
 
@@ -349,6 +349,7 @@ export default function App() {
   const renderVisualThemeOption = (option: (typeof VISUAL_THEMES)[number]) => (
     <button
       key={option.id}
+      type="button"
       role="menuitemradio"
       aria-checked={visualTheme === option.id}
       onClick={() => {
@@ -402,7 +403,7 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/60 via-zinc-900/20 to-transparent" />
 
         {/* Top-right App Controls: install, theme, fullscreen countdown, markitdown */}
-        <div className="absolute top-4 right-4 z-10 flex flex-wrap items-center gap-2">
+        <div className="absolute top-4 right-4 z-50 flex flex-wrap items-center gap-2">
           <button
             onClick={() => setIsFullscreenCountdownOpen(true)}
             className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md hover:bg-black/60 text-white font-semibold px-3 py-2 rounded-xl border border-white/10 text-xs transition-all cursor-pointer shadow-lg"
@@ -461,11 +462,11 @@ export default function App() {
                 {CLASSIC_THEME_OPTIONS.map((option) => (
                   <button
                     key={option.id}
+                    type="button"
                     role="menuitemradio"
                     aria-checked={visualTheme === 'academic' && theme === option.id}
                     onClick={() => {
-                      setVisualTheme('academic');
-                      setTheme(option.id);
+                      setClassicTheme(option.id);
                       setIsThemePickerOpen(false);
                     }}
                     className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
