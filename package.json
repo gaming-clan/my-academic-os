@@ -1,15 +1,30 @@
 {
-  "name": "react-example",
+  "name": "my-academic-os",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Organizues akademik lokal dhe offline për studentë dhe nxënës shqiptarë.",
+  "author": "Dario Lloshi",
   "license": "MIT",
+  "homepage": "https://github.com/gaming-clan/my-academic-os",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gaming-clan/my-academic-os.git"
+  },
+  "keywords": [
+    "academic-planner",
+    "student-dashboard",
+    "albanian",
+    "pwa",
+    "offline"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "package:sale": "bash scripts/package-sale.sh"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.20",
