@@ -1,3 +1,5 @@
+import JSZip from 'jszip';
+
 /**
  * Microsoft MarkItDown Engine - Client-side Browser Implementation
  * Converts various file formats (PDF, Word DOCX, PowerPoint PPTX, Excel/CSV, Images, HTML, Plain Text)
@@ -230,8 +232,7 @@ async function processPdfFile(file: File): Promise<{ text: string; pageCount: nu
       try {
         const buffer = reader.result as ArrayBuffer;
         const bytes = new Uint8Array(buffer);
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        const decoded = decoder.decode(bytes);
+        const decoded = decodeTextWithFallbacks(bytes);
 
         // Find page markers if present (/Page /Type)
         const pageMatches = decoded.match(/\/Type\s*\/Page\b/g);
@@ -290,32 +291,38 @@ async function processPdfFile(file: File): Promise<{ text: string; pageCount: nu
 }
 
 async function processWordFile(file: File): Promise<string> {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const buffer = reader.result as ArrayBuffer;
-        const bytes = new Uint8Array(buffer);
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        const decoded = decoder.decode(bytes);
+  try {
+    const isDocx = file.name.toLowerCase().endsWith('.docx') || file.type.includes('wordprocessingml.document');
 
-        // Extract printable text sections from docx zip XML or raw bytes
-        const cleanText = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
-          .split(/[\r\n]+/)
-          .map((l) => l.trim())
-          .filter((l) => l.length > 3 && !l.includes('Word.Document') && !l.includes('xml'));
-
-        if (cleanText.length > 0) {
-          resolve(autoStructureText(cleanText.join('\n')));
-        } else {
-          resolve(`> 📘 **Dokument Word (.docx): ${file.name}**\n\n*Dokumenti u importua me sukses.*`);
-        }
-      } catch (e) {
-        resolve(`> 📘 **Dokument Word (.docx): ${file.name}**`);
+    if (isDocx) {
+      const extracted = await extractDocxText(file);
+      if (extracted.trim().length > 0) {
+        return autoStructureText(extracted);
       }
-    };
-    reader.readAsArrayBuffer(file);
-  });
+    }
+
+    const reader = new FileReader();
+    const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+      reader.onload = () => resolve(reader.result as ArrayBuffer);
+      reader.onerror = () => reject(new Error('Failed to read Word file'));
+      reader.readAsArrayBuffer(file);
+    });
+
+    const bytes = new Uint8Array(buffer);
+    const decoded = decodeTextWithFallbacks(bytes);
+    const cleanText = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
+      .split(/[\r\n]+/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 3 && !l.includes('Word.Document') && !l.includes('xml'));
+
+    if (cleanText.length > 0) {
+      return autoStructureText(cleanText.join('\n'));
+    }
+
+    return `> 📘 **Dokument Word (.docx): ${file.name}**\n\n*Dokumenti u importua me sukses.*`;
+  } catch (error) {
+    return `> 📘 **Dokument Word (.docx): ${file.name}**`;
+  }
 }
 
 async function processPowerPointFile(file: File): Promise<{ text: string; slideCount: number }> {
@@ -325,8 +332,7 @@ async function processPowerPointFile(file: File): Promise<{ text: string; slideC
       try {
         const buffer = reader.result as ArrayBuffer;
         const bytes = new Uint8Array(buffer);
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        const decoded = decoder.decode(bytes);
+        const decoded = decodeTextWithFallbacks(bytes);
 
         // Count slide XML references
         const slideMatches = decoded.match(/ppt\/slides\/slide\d+\.xml/g);
@@ -373,8 +379,7 @@ async function processExcelFile(file: File): Promise<string> {
       try {
         const buffer = reader.result as ArrayBuffer;
         const bytes = new Uint8Array(buffer);
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        const decoded = decoder.decode(bytes);
+        const decoded = decodeTextWithFallbacks(bytes);
 
         // Extract cell text strings
         const textCells = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
@@ -409,12 +414,90 @@ async function processFallbackFile(file: File): Promise<string> {
   }
 }
 
+export async function extractDocxText(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const xmlEntry = zip.file('word/document.xml');
+
+  if (!xmlEntry) {
+    return '';
+  }
+
+  const xml = await xmlEntry.async('text');
+  return extractTextFromDocxXml(xml);
+}
+
+export function extractTextFromDocxXml(xml: string): string {
+  const paragraphMatches = [...xml.matchAll(/<w:p(?:\s[^>]*)?>([\s\S]*?)<\/w:p>/g)];
+
+  if (paragraphMatches.length > 0) {
+    const lines = paragraphMatches
+      .map((match) =>
+        [...match[1].matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)]
+          .map((textMatch) => decodeXmlEntities(textMatch[1]))
+          .join('')
+      )
+      .filter((line) => line.trim().length > 0);
+
+    if (lines.length > 0) {
+      return sanitizeExtractedText(lines.join('\n'));
+    }
+  }
+
+  const textMatches = [...xml.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)];
+  const combined = textMatches.map((match) => decodeXmlEntities(match[1])).join(' ');
+  return sanitizeExtractedText(combined);
+}
+
+function decodeXmlEntities(value: string): string {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, decimal) => String.fromCodePoint(Number(decimal)));
+}
+
 export function sanitizeExtractedText(rawText: string): string {
   return rawText
     .normalize('NFC')
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ')
     .replace(/\uFFFD/g, ' ')
     .replace(/[\t ]+\n/g, '\n');
+}
+
+export function decodeTextWithFallbacks(bytes: Uint8Array): string {
+  const candidates = ['utf-8', 'utf-16le', 'utf-16be', 'windows-1250', 'iso-8859-2', 'latin1'];
+  let bestDecoded = '';
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  candidates.forEach((encoding) => {
+    try {
+      const decoded = new TextDecoder(encoding, { fatal: false }).decode(bytes);
+      const score = scoreDecodedText(decoded);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestDecoded = decoded;
+      }
+    } catch {
+      // Ignore unsupported encodings and continue to the next fallback.
+    }
+  });
+
+  return bestDecoded || new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+}
+
+function scoreDecodedText(value: string): number {
+  const replacementPenalty = (value.match(/\uFFFD/g) || []).length * 200;
+  const controlPenalty = (value.match(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g) || []).length * 100;
+  const mojibakePenalty = (value.match(/[ÃÂÐÕÅØ]/g) || []).length * 80;
+  const albanianBonus = (value.match(/[ÇçËëÑñŠšŽž]/g) || []).length * 60;
+  const letterBonus = (value.match(/[A-Za-z]/g) || []).length;
+
+  return letterBonus + albanianBonus - replacementPenalty - controlPenalty - mojibakePenalty;
 }
 
 // === Helpers ===
