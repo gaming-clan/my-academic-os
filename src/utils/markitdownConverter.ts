@@ -254,8 +254,7 @@ async function processPdfFile(file: File): Promise<{ text: string; pageCount: nu
         }
 
         // Fallback: extract continuous printable text lines
-        const cleanLines = decoded
-          .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
+        const cleanLines = sanitizeExtractedText(decoded)
           .split(/[\r\n]+/)
           .map((line) => line.trim())
           .filter(
@@ -301,9 +300,7 @@ async function processWordFile(file: File): Promise<string> {
         const decoded = decoder.decode(bytes);
 
         // Extract printable text sections from docx zip XML or raw bytes
-        const cleanText = decoded
-          .replace(/<[^>]+>/g, ' ') // Strip XML tags if docx
-          .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
+        const cleanText = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
           .split(/[\r\n]+/)
           .map((l) => l.trim())
           .filter((l) => l.length > 3 && !l.includes('Word.Document') && !l.includes('xml'));
@@ -335,9 +332,7 @@ async function processPowerPointFile(file: File): Promise<{ text: string; slideC
         const slideMatches = decoded.match(/ppt\/slides\/slide\d+\.xml/g);
         const slideCount = slideMatches ? new Set(slideMatches).size : 1;
 
-        const cleanText = decoded
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
+        const cleanText = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
           .split(/[\r\n]+/)
           .map((l) => l.trim())
           .filter((l) => l.length > 3 && !l.includes('PowerPoint') && !l.includes('xml'));
@@ -382,9 +377,7 @@ async function processExcelFile(file: File): Promise<string> {
         const decoded = decoder.decode(bytes);
 
         // Extract cell text strings
-        const textCells = decoded
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
+        const textCells = sanitizeExtractedText(decoded.replace(/<[^>]+>/g, ' '))
           .split(/[\r\n]+/)
           .map((l) => l.trim())
           .filter((l) => l.length > 1 && !l.includes('workbook') && !l.includes('xml'));
@@ -410,10 +403,18 @@ async function processExcelFile(file: File): Promise<string> {
 async function processFallbackFile(file: File): Promise<string> {
   try {
     const raw = await readAsText(file);
-    return autoStructureText(raw.replace(/[\x00-\x09\x0B\x0C\x0E-\x1F]/g, ' '));
+    return autoStructureText(sanitizeExtractedText(raw));
   } catch (e) {
     return `> 📁 **Skedari: ${file.name}**\n\n*Skedari u ngarkua me sukses.*`;
   }
+}
+
+export function sanitizeExtractedText(rawText: string): string {
+  return rawText
+    .normalize('NFC')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ')
+    .replace(/\uFFFD/g, ' ')
+    .replace(/[\t ]+\n/g, '\n');
 }
 
 // === Helpers ===

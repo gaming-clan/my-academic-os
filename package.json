@@ -24,7 +24,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "package:sale": "bash scripts/package-sale.sh"
+    "package:sale": "bash scripts/package-sale.sh",
+    "test": "node --test --import tsx"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.20",
