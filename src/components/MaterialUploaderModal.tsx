@@ -212,7 +212,7 @@ export default function MaterialUploaderModal({
               Tërhiqni skedarët këtu ose klikoni për të shfletuar
             </h4>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 max-w-md mx-auto">
-              Konvertim me **Microsoft MarkItDown**: PDF (<strong>.pdf</strong>), Word (<strong>.docx</strong>), PowerPoint (<strong>.pptx</strong>), Excel/CSV (<strong>.xlsx, .csv</strong>), Imazhe (<strong>.png, .jpg</strong>), Tekst &amp; HTML.
+              Konvertim me <strong>Microsoft MarkItDown</strong>: PDF (<strong>.pdf</strong>), Word (<strong>.docx</strong>), PowerPoint (<strong>.pptx</strong>), Excel/CSV (<strong>.xlsx, .csv</strong>), Imazhe (<strong>.png, .jpg</strong>), Tekst &amp; HTML.
             </p>
           </div>
 
